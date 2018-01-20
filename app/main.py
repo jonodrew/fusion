@@ -14,14 +14,14 @@ def calculate_aggregate_match_score(matched_list: List[int]) -> int:
 
 def main():
     t1 = time.clock()
-    number = 10
+    number = 500
     l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
                 department=random_select(departments)) for i in range(number)]
 
     l_fs = [FastStreamer(identifier=i, clearance=random_select(clearances)) for i in range(number, number+number)]
     for f in l_fs:
-        f.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchor': random_select(anchors),
+        f.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchors': random_select(anchors),
                             'location': random_select(locations)})
     print("Data generated at {}".format(time.clock()))
     l_m = [Match(fser_object=f, post_object=p) for f in l_fs for p in l_p]
@@ -49,7 +49,9 @@ def main():
         print("Score: {}".format(r[row][col][2]))
         print("Post: {}, FastStreamer: {}".format(r[row][col][0], r[row][col][1]))
     print(total_time)
-    print(calculate_aggregate_match_score([r[row][col][2] for row, col in indices]))
+    aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
+    print("Aggregate score: {}".format(aggregate))
+    print("Average score: {}".format(aggregate/number))
 
 
     """

@@ -1,4 +1,4 @@
-from random import randrange
+from random import randrange, choice
 from typing import List
 
 import pytest
@@ -27,14 +27,14 @@ def model_fser():
 @pytest.fixture
 def model_post():
     return Post(skills=['Digital', 'CM'], identifier=789, anchor='Digital', clearance='SC', location='London',
-                department='Home Office')
+                department='Home Office', private_office=False)
 
 
 @pytest.fixture
 def random_fser() -> FastStreamer:
     r = FastStreamer(identifier=randrange(0, 1000))
     r.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchors': random_select(anchors),
-                        'location': random_select(locations)})
+                        'location': random_select(locations), 'private_office': choice[True, False]})
     return r
 
 
@@ -42,7 +42,13 @@ def random_fser() -> FastStreamer:
 def random_post() -> Post:
     p = Post(skills=[random_select(skills), random_select(skills)], identifier=randrange(0, 1000),
              anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
-             department=random_select(departments))
+             department=random_select(departments), private_office=choice[True, False])
     return p
 
 
+@pytest.fixture
+def model_fser_with_prefs() -> FastStreamer:
+    fs = FastStreamer(123456, skills=['PPM', 'CM'], anchors=['Policy', 'Corporate'],
+                      restrictions=['None'], clearance='SC')
+    fs.set_preference(**{'skills': ['Digital', 'PM'], 'anchors': 'Digital', 'private__office': False})
+    return fs

@@ -29,9 +29,9 @@ class FastStreamer:
 
         self.preferences = {
             'skills': [],
-            'anchor': "",
+            'anchors': "",
             'location': "",
-            'private_office': None
+            'private_office': False
         }
 
     def set_preference(self, **kwargs: Dict[str, Union[List[str], str]]):
@@ -53,11 +53,12 @@ class FastStreamer:
 
 
 class Post:
-    def __init__(self, skills, identifier, anchor, clearance, location, department, po: bool=False):
+    def __init__(self, skills: List[str], identifier: int, anchor: str, clearance: str, location: str, department: str,
+                 private_office: bool=False):
         """
         This class contains information about the post, so it can be manipulated and matched
         Args:
-            po (bool): Whether the Post is in a private office
+            private_office (bool): Whether the Post is in a private office
             identifier (int): Unique identifier for the post
             skills(List[str]): List of skills the candidate will gain in the post
             anchor (str): The core capability built by the post
@@ -71,7 +72,7 @@ class Post:
         self.skills = skills
         self.location = location
         self.clearance = clearance
-        self.is_private_office = po
+        self.is_private_office = private_office
 
 
 class Match:
@@ -119,11 +120,12 @@ class Match:
     def __init__(self, post_object: Post=None, fser_object: FastStreamer=None) -> None:
         self.post = post_object
         self.fast_streamer = fser_object
-        self.anchor_match = self.score_if_equal(self.post.anchor, self.fast_streamer.preferences['anchor'], 10)
+        self.po_match = self.compare_private_office()
+        self.anchor_match = self.score_if_equal(self.post.anchor, self.fast_streamer.preferences['anchors'], 10)
         self.match_scores = [self.anchor_match]
         self.total = self.create_match_score(self.match_scores)
         # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
-        self.total *= self.compare_clearance()
+        self.total *= self.compare_clearance() * self.po_match
         # could include a flag for 'willing to undertake DV' as an if before the line above
         # if post.clearance - fast_streamer.clearance == 1 allows for SC to be considered for DV roles
 
@@ -139,3 +141,6 @@ class Match:
         post_c = self.convert_clearances(self.post.clearance)
         fs_c = self.convert_clearances(self.fast_streamer.clearance)
         return post_c <= fs_c
+
+    def compare_private_office(self) -> bool:
+        return (not self.post.is_private_office) or self.fast_streamer.preferences['private_office']
