@@ -12,19 +12,23 @@ def calculate_aggregate_match_score(matched_list: List[int]) -> int:
     return sum(matched_list)
 
 
-def main():
-    t1 = time.clock()
-    number = 500
+def generate_test_data(amount: int) -> List[Match]:
     l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
-                department=random_select(departments)) for i in range(number)]
+                department=random_select(departments)) for i in range(amount)]
 
-    l_fs = [FastStreamer(identifier=i, clearance=random_select(clearances)) for i in range(number, number+number)]
+    l_fs = [FastStreamer(identifier=i, clearance=random_select(clearances)) for i in range(amount, 2*amount)]
     for f in l_fs:
         f.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchors': random_select(anchors),
                             'location': random_select(locations)})
+    return [Match(fser_object=f, post_object=p) for f in l_fs for p in l_p]
+
+
+def main():
+    t1 = time.clock()
+    number = 5
+    l_m = generate_test_data(number)
     print("Data generated at {}".format(time.clock()))
-    l_m = [Match(fser_object=f, post_object=p) for f in l_fs for p in l_p]
     for m in l_m:
         m.total = random.randrange(0, 100)
     tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total) for m in l_m]
@@ -52,29 +56,6 @@ def main():
     aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
     print("Aggregate score: {}".format(aggregate))
     print("Average score: {}".format(aggregate/number))
-
-
-    """
-    matrix = [[5, 9, 3],
-              [1, 4, 0],
-              [9, 2, 4]]
-    cost_matrix = []
-    for row in matrix:
-        cost_row = []
-        for col in row:
-            cost_row += [sys.maxsize - col]
-        cost_matrix += [cost_row]
-    print(cost_matrix)
-    m = munkres.Munkres()
-    indexes = m.compute(cost_matrix)
-    munkres.print_matrix(matrix, msg="Highest profit through this matrix: ")
-    total = 0
-    for row, column in indexes:
-        value = matrix[row][column]
-        total += value
-        print('(%d, %d) -> %d' % (row, column, value))
-    print('total profit=%d' % total)
-    """
 
 
 if __name__ == '__main__':

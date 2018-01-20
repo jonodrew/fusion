@@ -1,5 +1,4 @@
 from typing import List, Union
-
 from tests.conftest import random_fser, random_post
 from app.classes import Match, FastStreamer, Post
 
