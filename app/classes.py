@@ -78,30 +78,30 @@ class Post:
 class Match:
 
     @staticmethod
-    def score_if_equal(p_attribute: str, fs_attribute: str, value: int) -> int:
+    def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
         """
-        Compare two attributes. If they're equal, return the value, otherwise return 0.
+        Compare two attributes. If they're equal, return True, otherwise return False.
         Args:
-            p_attribute: some attribute of the post
-            fs_attribute: some attribute of the FastStreamer
-            value (int): the value of a match
+            p_attribute (str): some attribute of the post
+            fs_attribute (str): some attribute of the FastStreamer
 
         Returns:
             int: the value of the match of the two attributes
 
         """
-        if p_attribute == fs_attribute:
-            r = value
-        else:
-            r = 0
-        return r
+        return p_attribute == fs_attribute
 
     @staticmethod
-    def create_match_score(scores: List[int]) -> int:
-        total = 0
-        for score in scores:
-            total += score
-        return total
+    def create_match_score(scores: Dict[str, int]) -> int:
+        """
+        This method returns the sum of all the scores, passed as a dictionary
+        Args:
+            scores:
+
+        Returns:
+
+        """
+        return sum([scores[k] for k in scores])
 
     @staticmethod
     def convert_clearances(clearance: str) -> int:
@@ -121,9 +121,10 @@ class Match:
         self.post = post_object
         self.fast_streamer = fser_object
         self.po_match = self.compare_private_office()
-        self.anchor_match = self.score_if_equal(self.post.anchor, self.fast_streamer.preferences['anchors'], 10)
-        self.match_scores = [self.anchor_match]
-        self.total = self.create_match_score(self.match_scores)
+        self.anchor_match = self.check_if_equal(self.post.anchor, self.fast_streamer.preferences['anchors'])
+        self.match_scores = {'anchor': self.anchor_match}
+        self.weighted_scores = self.apply_weighting(weighting_dict={'anchor': 10})
+        self.total = self.create_match_score(self.weighted_scores)
         # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
         self.total *= self.compare_clearance() * self.po_match
         # could include a flag for 'willing to undertake DV' as an if before the line above
@@ -144,3 +145,10 @@ class Match:
 
     def compare_private_office(self) -> bool:
         return (not self.post.is_private_office) or self.fast_streamer.preferences['private_office']
+
+    def check_x_in_y_list(self) -> bool:
+        pass
+
+    def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
+        return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
+

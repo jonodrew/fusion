@@ -27,13 +27,6 @@ def test_set_fser_preferences(model_fser):
     assert model_fser.preferences['brains'] is None
 
 
-def test_score_if_equal(model_fser: FastStreamer, model_post: Post):
-    m = Match(model_post, model_fser)
-    model_fser.set_preference(**{'skills': ['Digital', 'PM'], 'anchors': 'Digital'})
-    assert m.score_if_equal(model_post.anchor, model_fser.preferences['anchors'], 5) == 5
-    assert m.score_if_equal(model_post.skills[0], model_fser.preferences['skills'], 5) != 5
-
-
 def test_given_clearance_return_value(model_fser, model_post):
     m = Match(model_post, model_fser)
     clearances = ['SC', 'BPSS', 'DV', 'CTC']
