@@ -37,4 +37,3 @@ def test_no_clearance_voids_match_total(model_fser_with_prefs, model_post):
     assert 12 == Match(model_post, model_fser_with_prefs).total
     fs = FastStreamer(identifier=1, clearance='BPSS')
     assert 0 == Match(model_post, fs).total
-

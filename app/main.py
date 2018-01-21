@@ -48,25 +48,25 @@ def test_run(number):
     indices = m.compute(cost_matrix)
     t2 = time.clock()
     total_time = t2 - t1
-    print("Run {} complete!".format(number))
     aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
     post_fs = [r[row][col][3] for row, col in indices]
     rm = []
     for pfs in post_fs:
         rm = list(filter(lambda x: x.identifier == pfs, l_m))
+    print("Run {} complete!".format(number))
     return {'aggregate': aggregate, 'processing': total_time, 'matches': rm}
 
 
 def main():
-    results = [(i, test_run(i)) for i in range(10, 20)]
+    results = [(i, test_run(i)) for i in range(1200, 1500, 100)]
     for r in results:
         print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(r[0], r[1]['aggregate']/r[0],
                                                                             r[1]['processing']))
-        for m in r[1]['matches']:
-            """Example output - at scale you wouldn't read it all but you could group and send to CLs"""
-            ws = m.weighted_scores
-            print("FastStreamer id: {}\nPost id: {}\nMatch score: {}\n\tAnchor score: {}\n\tLocation score: {}\n\n"
-                  .format(m.fast_streamer.identifier, m.post.identifier, m.total, ws['anchor'], ws['location']))
+        # for m in r[1]['matches']:
+        #     """Example output - at scale you wouldn't read it all but you could group and send to CLs"""
+        #     ws = m.weighted_scores
+        #     print("FastStreamer id: {}\nPost id: {}\nMatch score: {}\n\tAnchor score: {}\n\tLocation score: {}\n\n"
+        #           .format(m.fast_streamer.identifier, m.post.identifier, m.total, ws['anchor'], ws['location']))
 
 
 if __name__ == '__main__':
