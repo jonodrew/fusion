@@ -22,15 +22,15 @@ def generate_test_data(amount: int) -> List[Match]:
         f.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
                           2: random_select(anchors)}, loc=random_select(locations), sec=random.choice([True, False]),
                           dv=random.choice([True, False]), po=random.choice([True, False]))
-    return [Match(fser_object=f, post_object=p) for f in l_fs for p in l_p]
+    return [Match(identifier=i, fser_object=f, post_object=p) for i, f in enumerate(l_fs) for p in l_p]
 
 
 def test_run(number):
     t1 = time.clock()
     l_m = generate_test_data(number)
-    for m in l_m:
-        m.total = random.randrange(0, 100)
-    tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total) for m in l_m]
+    # for m in l_m:
+    #     m.total = randrange(0, 13)
+    tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total, m.identifier) for m in l_m]
     r = []
     t = set([t[0] for t in tuples_data])
     for i in t:
@@ -50,13 +50,23 @@ def test_run(number):
     total_time = t2 - t1
     print("Run {} complete!".format(number))
     aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
-    return {'aggregate': aggregate, 'processing': total_time}
+    post_fs = [r[row][col][3] for row, col in indices]
+    rm = []
+    for pfs in post_fs:
+        rm = list(filter(lambda x: x.identifier == pfs, l_m))
+    return {'aggregate': aggregate, 'processing': total_time, 'matches': rm}
 
 
 def main():
-    results = ((i, test_run(i)) for i in range(10, 20))
+    results = [(i, test_run(i)) for i in range(10, 20)]
     for r in results:
-        print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(r[0], r[1]['aggregate']/r[0], r[1]['processing']))
+        print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(r[0], r[1]['aggregate']/r[0],
+                                                                            r[1]['processing']))
+        for m in r[1]['matches']:
+            """Example output - at scale you wouldn't read it all but you could group and send to CLs"""
+            ws = m.weighted_scores
+            print("FastStreamer id: {}\nPost id: {}\nMatch score: {}\n\tAnchor score: {}\n\tLocation score: {}\n\n"
+                  .format(m.fast_streamer.identifier, m.post.identifier, m.total, ws['anchor'], ws['location']))
 
 
 if __name__ == '__main__':

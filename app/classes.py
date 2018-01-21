@@ -113,7 +113,8 @@ class Match:
         c = {'SC': 3, 'DV': 4, 'CTC': 2, 'BPSS': 1}
         return c[clearance]
 
-    def __init__(self, post_object: Post=None, fser_object: FastStreamer=None) -> None:
+    def __init__(self, identifier, post_object: Post=None, fser_object: FastStreamer=None) -> None:
+        self.identifier = identifier
         self.post = post_object
         self.fast_streamer = fser_object
         self.po_match = self.compare_private_office()

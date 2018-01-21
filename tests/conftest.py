@@ -34,8 +34,9 @@ def model_post():
 def random_fser() -> FastStreamer:
     r = FastStreamer(identifier=randrange(0, 1000))
     r.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
-                          2: random_select(anchors)}, loc=random_select(locations), sec=random.choice([True, False]),
-                          dv=random.choice([True, False]), po=random.choice([True, False]))
+                                                                                      2: random_select(anchors)},
+                      loc=random_select(locations), sec=random.choice([True, False]),
+                      dv=random.choice([True, False]), po=random.choice([True, False]))
     return r
 
 
