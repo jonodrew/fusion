@@ -17,14 +17,6 @@ def random_list(object_to_create: str, number: int) -> List[Union[Post, FastStre
 
 def test_fser_inits_correctly(model_fser):
     assert model_fser.profile['skills'][0] == 'PPM'
-    assert model_fser.preferences['anchors'] == ""
-
-
-def test_set_fser_preferences(model_fser):
-    model_fser.set_preference(**{'skills': ['Digital', 'PM']})
-    assert model_fser.preferences['skills'] == ['Digital', 'PM']
-    model_fser.set_preference(**{'brains': None})
-    assert model_fser.preferences['brains'] is None
 
 
 def test_given_clearance_return_value(model_fser, model_post):
@@ -42,7 +34,7 @@ def test_compare_clearances(model_fser, model_post):
 
 
 def test_no_clearance_voids_match_total(model_fser_with_prefs, model_post):
-    assert 10 == Match(model_post, model_fser_with_prefs).total
+    assert 12 == Match(model_post, model_fser_with_prefs).total
     fs = FastStreamer(identifier=1, clearance='BPSS')
-    assert Match(model_post, fs).total == 0
+    assert 0 == Match(model_post, fs).total
 

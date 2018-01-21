@@ -1,6 +1,6 @@
 from random import randrange, choice
 from typing import List
-
+import random
 import pytest
 
 from app.classes import FastStreamer, Post
@@ -33,8 +33,9 @@ def model_post():
 @pytest.fixture
 def random_fser() -> FastStreamer:
     r = FastStreamer(identifier=randrange(0, 1000))
-    r.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchors': random_select(anchors),
-                        'location': random_select(locations), 'private_office': choice[True, False]})
+    r.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
+                          2: random_select(anchors)}, loc=random_select(locations), sec=random.choice([True, False]),
+                          dv=random.choice([True, False]), po=random.choice([True, False]))
     return r
 
 
@@ -50,5 +51,6 @@ def random_post() -> Post:
 def model_fser_with_prefs() -> FastStreamer:
     fs = FastStreamer(123456, skills=['PPM', 'CM'], anchors=['Policy', 'Corporate'],
                       restrictions=['None'], clearance='SC')
-    fs.set_preference(**{'skills': ['Digital', 'PM'], 'anchors': 'Digital', 'private__office': False})
+    fs.set_preferences(skills=['Digital', 'PM'], anchors={1: 'Digital', 2: 'Operations'}, dv=False, po=False,
+                       loc='London', sec=False)
     return fs

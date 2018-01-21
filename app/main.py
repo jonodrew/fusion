@@ -19,16 +19,15 @@ def generate_test_data(amount: int) -> List[Match]:
 
     l_fs = [FastStreamer(identifier=i, clearance=random_select(clearances)) for i in range(amount, 2*amount)]
     for f in l_fs:
-        f.set_preference(**{'skills': [random_select(skills), random_select(skills)], 'anchors': random_select(anchors),
-                            'location': random_select(locations)})
+        f.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
+                          2: random_select(anchors)}, loc=random_select(locations), sec=random.choice([True, False]),
+                          dv=random.choice([True, False]), po=random.choice([True, False]))
     return [Match(fser_object=f, post_object=p) for f in l_fs for p in l_p]
 
 
-def main():
+def test_run(number):
     t1 = time.clock()
-    number = 5
     l_m = generate_test_data(number)
-    print("Data generated at {}".format(time.clock()))
     for m in l_m:
         m.total = random.randrange(0, 100)
     tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total) for m in l_m]
@@ -42,20 +41,22 @@ def main():
     for row in r:
         cost_row = []
         for col in row:
-            cost_row += [sys.maxsize-col[2]]
+            cost_row += [sys.maxsize - col[2]]
         cost_matrix += [cost_row]
     m = munkres.Munkres()
     m.pad_matrix(cost_matrix)
     indices = m.compute(cost_matrix)
     t2 = time.clock()
     total_time = t2 - t1
-    for row, col in indices:
-        print("Score: {}".format(r[row][col][2]))
-        print("Post: {}, FastStreamer: {}".format(r[row][col][0], r[row][col][1]))
-    print(total_time)
+    print("Run {} complete!".format(number))
     aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
-    print("Aggregate score: {}".format(aggregate))
-    print("Average score: {}".format(aggregate/number))
+    return {'aggregate': aggregate, 'processing': total_time}
+
+
+def main():
+    results = ((i, test_run(i)) for i in range(10, 20))
+    for r in results:
+        print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(r[0], r[1]['aggregate']/r[0], r[1]['processing']))
 
 
 if __name__ == '__main__':

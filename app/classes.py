@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Any
 
 
 class FastStreamer:
@@ -27,29 +27,25 @@ class FastStreamer:
             'departments': departments
         }
 
-        self.preferences = {
-            'skills': [],
-            'anchors': "",
-            'location': "",
-            'private_office': False
-        }
+        self.preferences = Preferences()
 
-    def set_preference(self, **kwargs: Dict[str, Union[List[str], str]]):
+    def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: str, sec: bool):
         """
-
+        This method sets the attributes for the Preference object, which usually belongs to the FastStreamer object
         Args:
-            **kwargs: Variable number of keyword arguments
+            anchors:
+            skills:
+            dv:
+            po:
+            loc:
+            sec:
 
         Returns:
             None
 
         """
-        if kwargs is not None:
-            for key, value in kwargs.items():
-                try:
-                    self.preferences[key] = value
-                except KeyError:
-                    pass
+        self.preferences = Preferences(anchors=anchors, skills=skills, undertake_dv=dv, want_po=po, location=loc,
+                                       secondment=sec)
 
 
 class Post:
@@ -121,14 +117,17 @@ class Match:
         self.post = post_object
         self.fast_streamer = fser_object
         self.po_match = self.compare_private_office()
-        self.anchor_match = self.check_if_equal(self.post.anchor, self.fast_streamer.preferences['anchors'])
-        self.match_scores = {'anchor': self.anchor_match}
-        self.weighted_scores = self.apply_weighting(weighting_dict={'anchor': 10})
+        self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
+        self.clearance_match = self.compare_clearance()
+        self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
+        self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
+        self.weighted_scores = self.apply_weighting(weighting_dict={'anchor': 10, 'location': 2})
         self.total = self.create_match_score(self.weighted_scores)
         # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
         self.total *= self.compare_clearance() * self.po_match
         # could include a flag for 'willing to undertake DV' as an if before the line above
-        # if post.clearance - fast_streamer.clearance == 1 allows for SC to be considered for DV roles
+        # if post.clearance - fast_streamer.clearance == 1 allows for SC to be considered for DV roles if the scoring
+        # is tweaked
 
     def compare_clearance(self) -> bool:
         """
@@ -146,9 +145,27 @@ class Match:
     def compare_private_office(self) -> bool:
         return (not self.post.is_private_office) or self.fast_streamer.preferences['private_office']
 
-    def check_x_in_y_list(self) -> bool:
-        pass
+    @staticmethod
+    def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
+        return value_to_check in set(list_to_check)
+
+    @staticmethod
+    def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
+        return value_to_check in [v for k, v in dict_to_check.items()]
 
     def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
         return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
 
+
+class Preferences:
+    def __init__(self, anchors: Dict[int, str]=None, skills=None, undertake_dv=False, want_po=False, location=None,
+                 secondment=False):
+        if anchors is None:
+            self.anchors = {1: "", 2: ""}
+        else:
+            self.anchors = anchors
+        self.skills = skills
+        self.will_undertake_dv = undertake_dv
+        self.wants_private_office = want_po
+        self.location = location
+        self.secondment = secondment
