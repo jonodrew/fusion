@@ -142,7 +142,11 @@ class Match:
         """
         post_c = self.convert_clearances(self.post.clearance)
         fs_c = self.convert_clearances(self.fast_streamer.clearance)
-        return post_c <= fs_c
+        if self.post.clearance == 'DV' and self.fast_streamer.preferences.will_undertake_dv is True:
+            r = True
+        else:
+            r = post_c <= fs_c
+        return r
 
     def compare_private_office(self) -> bool:
         return (not self.post.is_private_office) or self.fast_streamer.preferences.wants_private_office
