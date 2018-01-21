@@ -72,6 +72,7 @@ class Post:
 
 
 class Match:
+    weights_dict = {'anchor': 10, 'location': 2}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -122,7 +123,7 @@ class Match:
         self.clearance_match = self.compare_clearance()
         self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
         self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
-        self.weighted_scores = self.apply_weighting(weighting_dict={'anchor': 10, 'location': 2})
+        self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
         self.total = self.create_match_score(self.weighted_scores)
         # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
         self.total *= self.compare_clearance() * self.po_match
@@ -144,7 +145,7 @@ class Match:
         return post_c <= fs_c
 
     def compare_private_office(self) -> bool:
-        return (not self.post.is_private_office) or self.fast_streamer.preferences['private_office']
+        return (not self.post.is_private_office) or self.fast_streamer.preferences.wants_private_office
 
     @staticmethod
     def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
