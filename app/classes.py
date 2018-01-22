@@ -127,9 +127,6 @@ class Match:
         self.total = self.create_match_score(self.weighted_scores)
         # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
         self.total *= self.compare_clearance() * self.po_match
-        # could include a flag for 'willing to undertake DV' as an if before the line above
-        # if post.clearance - fast_streamer.clearance == 1 allows for SC to be considered for DV roles if the scoring
-        # is tweaked
 
     def compare_clearance(self) -> bool:
         """
