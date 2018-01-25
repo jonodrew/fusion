@@ -2,15 +2,12 @@ import sys
 import munkres
 import numpy as np
 import os
-from app.classes import Match
-from tests.conftest import *
 import time
 from operator import itemgetter
-import random
-from typing import List, Dict, Union
-import itertools
+from typing import List, Dict
 import sendgrid
 import yaml
+from app.classes import Match
 from sendgrid.helpers.mail import *
 
 
@@ -91,7 +88,7 @@ def calculate_matches(list_of_matches: List[Match]):
 def main():
     env = os.getenv("ENVIRONMENT")
     number = 100
-    l_m = None
+    l_m = None  # will contain data drawn from database
     # for m in l_m:
     #     m.total = randrange(1, 101)
     results = calculate_matches(l_m)

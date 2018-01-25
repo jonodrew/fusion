@@ -7,7 +7,7 @@ class FastStreamer:
     data for manipulation in the munkres algorithm."""
 
     def __init__(self, identifier: int, skills: List[str]=None, anchors: List[str]=None, restrictions: List[str]=None,
-                 clearance: str=None, departments: List[str]=None) -> None:
+                 clearance: str=None, departments: List[str]=None, national: bool=True) -> None:
         """
 
         Args:
@@ -20,6 +20,7 @@ class FastStreamer:
         """
         self.identifier = identifier
         self.clearance = clearance
+        self.national = national
         self.profile = {
             'skills': skills,
             'anchors': anchors,
@@ -50,7 +51,7 @@ class FastStreamer:
 
 class Post:
     def __init__(self, skills: List[str], anchor: str, clearance: str, location: str, department: str,
-                 private_office: bool=False, identifier: int=0):
+                 private_office: bool=False, identifier: int=0, reserved: bool=False):
         """
         This class contains information about the post, so it can be manipulated and matched
         Args:
@@ -69,6 +70,7 @@ class Post:
         self.location = location
         self.clearance = clearance
         self.is_private_office = private_office
+        self.reserved = reserved
 
 
 class Match:
@@ -114,19 +116,27 @@ class Match:
         c = {'SC': 3, 'DV': 4, 'CTC': 2, 'BPSS': 1}
         return c[clearance]
 
+    @staticmethod
+    def boolean_implication(a: bool, b: bool) -> bool:
+        return (not a) or b
+
     def __init__(self, identifier, post_object: Post=None, fser_object: FastStreamer=None) -> None:
         self.identifier = identifier
         self.post = post_object
         self.fast_streamer = fser_object
-        self.po_match = self.compare_private_office()
-        self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
+        self.po_match = self.boolean_implication(self.post.is_private_office,
+                                                 self.fast_streamer.preferences.wants_private_office)
+        self.reserved_match = self.boolean_implication(self.post.reserved, self.fast_streamer.national)
         self.clearance_match = self.compare_clearance()
-        self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
-        self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
-        self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
-        self.total = self.create_match_score(self.weighted_scores)
-        # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
-        self.total *= self.compare_clearance() * self.po_match
+        if not(self.clearance_match and self.po_match and self.reserved_match):
+            self.total = 0
+        else:
+            self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
+            self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
+            self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
+            self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
+            self.total = self.create_match_score(self.weighted_scores)
+            # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
 
     def compare_clearance(self) -> bool:
         """
