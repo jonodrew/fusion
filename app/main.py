@@ -60,28 +60,9 @@ def calculate_aggregate_match_score(matched_list: List[int]) -> int:
     return sum(matched_list)
 
 
-def generate_test_data(amount: int) -> List[Match]:
-    l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
-                anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
-                department=random_select(departments)) for i in range(amount)]
-
-    l_fs = [FastStreamer(identifier=i, clearance='SC') for i in range(amount, 2 * amount)]
-    for f in l_fs:
-        f.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
-                                                                                          2: random_select(anchors)},
-                          loc=random_select(locations), sec=random.choice([True, False]),
-                          dv=random.choice([True, False]), po=random.choice([True, False]))
-    number = itertools.count().__next__
-    print("Test data generated!")
-    return [Match(identifier=number(), fser_object=f, post_object=p) for f in l_fs for p in l_p]
-
-
-def test_run(number: int) -> Dict[str, Union[int, List[Match]]]:
+def calculate_matches(list_of_matches: List[Match]):
     t1 = time.clock()
-    l_m = generate_test_data(number)
-    # for m in l_m:
-    #     m.total = randrange(1, 101)
-    tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total, m.identifier) for m in l_m]
+    tuples_data = [(m.post.identifier, m.fast_streamer.identifier, m.total, m.identifier) for m in list_of_matches]
     r = []
     t = set([t[0] for t in tuples_data])
     for i in t:
@@ -99,19 +80,21 @@ def test_run(number: int) -> Dict[str, Union[int, List[Match]]]:
     indices = m.compute(cost_matrix)
     aggregate = calculate_aggregate_match_score([r[row][col][2] for row, col in indices])
     post_fs = [r[row][col][3] for row, col in indices]
-    rm = []
+    final_matches = []
     for pfs in post_fs:
-        rm.extend(list(filter(lambda x: x.identifier == pfs, l_m)))
-    print("Run {} complete!".format(number))
+        final_matches.extend(list(filter(lambda x: x.identifier == pfs, list_of_matches)))
     t2 = time.clock()
     total_time = t2 - t1
-    return {'aggregate': aggregate, 'processing': total_time, 'matches': rm}
+    return {'aggregate': aggregate, 'processing': total_time, 'matches': final_matches}
 
 
 def main():
     env = os.getenv("ENVIRONMENT")
     number = 100
-    results = test_run(number)
+    l_m = None
+    # for m in l_m:
+    #     m.total = randrange(1, 101)
+    results = calculate_matches(l_m)
     print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(number, results['aggregate'] / number,
                                                                         results['processing']))
     for m in results['matches']:

@@ -1,9 +1,11 @@
 from random import randrange, choice
 from typing import List
 import random
+
+import itertools
 import pytest
 
-from app.classes import FastStreamer, Post
+from app.classes import FastStreamer, Post, Match
 
 departments = ['Home Office', 'DWP', 'HMRC']
 skills = ['Project and People Management', 'Change Management']
@@ -55,3 +57,20 @@ def model_fser_with_prefs() -> FastStreamer:
     fs.set_preferences(skills=['Digital', 'PM'], anchors={1: 'Digital', 2: 'Operations'}, dv=False, po=False,
                        loc='London', sec=False)
     return fs
+
+
+@pytest.fixture
+def test_data() -> List[Match]:
+    amount = 100
+    l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
+                anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
+                department=random_select(departments)) for i in range(amount)]
+
+    l_fs = [FastStreamer(identifier=i, clearance='SC') for i in range(amount, 2 * amount)]
+    for f in l_fs:
+        f.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
+                                                                                          2: random_select(anchors)},
+                          loc=random_select(locations), sec=random.choice([True, False]),
+                          dv=random.choice([True, False]), po=random.choice([True, False]))
+    number = itertools.count().__next__
+    return [Match(identifier=number(), fser_object=f, post_object=p) for f in l_fs for p in l_p]
