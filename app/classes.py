@@ -31,7 +31,7 @@ class FastStreamer:
 
     def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: str, sec: bool):
         """
-        This method sets the attributes for the Preference object, which usually belongs to the FastStreamer object
+
         Args:
             anchors:
             skills:
@@ -49,8 +49,8 @@ class FastStreamer:
 
 
 class Post:
-    def __init__(self, skills: List[str], identifier: int, anchor: str, clearance: str, location: str, department: str,
-                 private_office: bool=False):
+    def __init__(self, skills: List[str], anchor: str, clearance: str, location: str, department: str,
+                 private_office: bool=False, identifier: int=0):
         """
         This class contains information about the post, so it can be manipulated and matched
         Args:
