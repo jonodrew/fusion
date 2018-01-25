@@ -74,7 +74,7 @@ class Post:
 
 
 class Match:
-    weights_dict = {'anchor': 10, 'location': 2}
+    weights_dict = {'anchor': 10, 'location': 2, 'skills': 5}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -103,6 +103,14 @@ class Match:
         return sum([scores[k] for k in scores])
 
     @staticmethod
+    def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
+        return value_to_check in set(list_to_check)
+
+    @staticmethod
+    def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
+        return value_to_check in [v for k, v in dict_to_check.items()]
+
+    @staticmethod
     def convert_clearances(clearance: str) -> int:
         """
         This function converts a clearance level as a string to an int for comparison
@@ -120,6 +128,10 @@ class Match:
     def boolean_implication(a: bool, b: bool) -> bool:
         return (not a) or b
 
+    @staticmethod
+    def check_any_item_from_list_a_in_list_b(a: List, b: List) -> bool:
+        return bool(set(a).intersection(set(b)))
+
     def __init__(self, identifier, post_object: Post=None, fser_object: FastStreamer=None) -> None:
         self.identifier = identifier
         self.post = post_object
@@ -135,7 +147,10 @@ class Match:
         else:
             self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
             self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
-            self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
+            self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
+                                                                          self.fast_streamer.preferences.skills)
+            self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
+                                 'skills': self.skills_match}
             self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
             self.total = self.create_match_score(self.weighted_scores)
 
@@ -158,14 +173,6 @@ class Match:
 
     def compare_private_office(self) -> bool:
         return (not self.post.is_private_office) or self.fast_streamer.preferences.wants_private_office
-
-    @staticmethod
-    def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
-        return value_to_check in set(list_to_check)
-
-    @staticmethod
-    def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
-        return value_to_check in [v for k, v in dict_to_check.items()]
 
     def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
         return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
