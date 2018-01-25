@@ -130,13 +130,14 @@ class Match:
         self.clearance_match = self.compare_clearance()
         if not(self.clearance_match and self.po_match and self.reserved_match):
             self.total = 0
+            # this approach massively improves speed when generating the matrix, but also means that the match cannot
+            # later be examined for how good or bad it was
         else:
             self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
             self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
             self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match}
             self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
             self.total = self.create_match_score(self.weighted_scores)
-            # if the FastStreamer doesn't have clearance, this will destroy the match. Desired behaviour?
 
     def compare_clearance(self) -> bool:
         """
