@@ -1,5 +1,4 @@
 from typing import List, Union
-from tests.conftest import random_fser, random_post
 from app.classes import Match, FastStreamer, Post
 
 
@@ -30,6 +29,9 @@ def test_compare_clearances(model_fser, model_post):
     m = Match(1, model_post, model_fser)
     assert m.compare_clearance()
     m.post.clearance = 'DV'
+    assert not m.compare_clearance()
+    m.post.clearance = "CTC"
+    m.fast_streamer.clearance = "BPSS"
     assert not m.compare_clearance()
 
 

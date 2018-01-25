@@ -1,7 +1,7 @@
 from random import randrange, choice
 from typing import List
 import random
-
+import os
 import itertools
 import pytest
 
@@ -12,8 +12,6 @@ skills = ['Project and People Management', 'Change Management']
 anchors = ['Digital', 'Corporate', 'Operations']
 locations = ['London', 'The North', 'Overseas']
 clearances = ['BPSS', 'CTC', 'SC', 'DV']
-
-list_length = 500
 
 
 def random_select(list_to_select_from: List[str]) -> str:
@@ -61,7 +59,10 @@ def model_fser_with_prefs() -> FastStreamer:
 
 @pytest.fixture
 def test_data() -> List[Match]:
-    amount = 100
+    if os.getenv("ENVIRONMENT") == "test":
+        amount = 1500
+    else:
+        amount = 500
     l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
                 department=random_select(departments)) for i in range(amount)]
