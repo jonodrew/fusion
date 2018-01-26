@@ -7,7 +7,7 @@ import pytest
 
 from app.classes import FastStreamer, Post, Match
 
-departments = ['Home Office', 'DWP', 'HMRC']
+departments = ['HO', 'DWP', 'HMRC', 'DH', 'CO', 'GDS', 'MOD', 'DDCMS', 'DCLG', 'DEFRA', 'MOJ', 'DFT', 'DFE', 'DFID']
 skills = ['Project and People Management', 'Change Management']
 anchors = ['Digital', 'Corporate', 'Operations']
 locations = ['London', 'The North', 'Overseas']
@@ -53,7 +53,7 @@ def model_fser_with_prefs() -> FastStreamer:
     fs = FastStreamer(123456, skills=['PPM', 'CM'], anchors=['Policy', 'Corporate'],
                       restrictions=['None'], clearance='SC')
     fs.set_preferences(skills=['Digital', 'PM'], anchors={1: 'Digital', 2: 'Operations'}, dv=False, po=False,
-                       loc='London', sec=False)
+                       loc='London', sec=False, departments={"DWP", "HO", "HMRC", "DDCMS", "DH"})
     return fs
 
 
@@ -62,15 +62,16 @@ def test_data() -> List[Match]:
     if os.getenv("ENVIRONMENT") == "test":
         amount = 1500
     else:
-        amount = 100
-    l_p = [Post(skills=[random_select(skills), random_select(skills)], identifier=i,
+        amount = 10
+    l_p = [Post(skills=random.sample(skills, 2), identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
                 department=random_select(departments)) for i in range(amount)]
 
     l_fs = [FastStreamer(identifier=i, clearance='SC') for i in range(amount, 2 * amount)]
     for f in l_fs:
-        f.set_preferences(skills=[random_select(skills), random_select(skills)], anchors={1: random_select(anchors),
-                                                                                          2: random_select(anchors)},
+        f.set_preferences(skills=random.sample(skills, 2), anchors={1: random_select(anchors),
+                                                                    2: random_select(anchors)},
+                          departments=random.sample(departments, 5),
                           loc=random_select(locations), sec=random.choice([True, False]),
                           dv=random.choice([True, False]), po=random.choice([True, False]))
     number = itertools.count().__next__

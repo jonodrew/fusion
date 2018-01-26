@@ -9,6 +9,7 @@ import sendgrid
 import yaml
 from app.classes import Match
 from sendgrid.helpers.mail import *
+from tests.conftest import test_data
 
 
 def load_config(environment: str="test") -> Dict[str, str]:
@@ -87,20 +88,21 @@ def calculate_matches(list_of_matches: List[Match]):
 
 def main():
     env = os.getenv("ENVIRONMENT")
-    number = 100
-    l_m = None  # will contain data drawn from database
+    l_m = test_data()  # will contain data drawn from database
     # for m in l_m:
     #     m.total = randrange(1, 101)
     results = calculate_matches(l_m)
-    print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(number, results['aggregate'] / number,
-                                                                        results['processing']))
+    print("Run {}: \n\tAverage score: {}\n\tProcessing time: {}".format(len(results['matches']), results['aggregate'] /
+                                                                        len(results['matches']), results['processing']))
     for m in results['matches']:
-        """Example output - at scale you wouldn't read it all but you could group and send to CLs"""
-        ws = m.weighted_scores
-        print("FastStreamer id: {}\nPost id: {}\nMatch score: {}\n\tAnchor score: {}\n\tLocation score: {}\n\n"
-              .format(m.fast_streamer.identifier, m.post.identifier, m.total, ws['anchor'], ws['location']))
+        if m.total < 15:
+            """Example output - at scale you wouldn't read it all but you could group and send to CLs"""
+            ws = m.weighted_scores
+            print("\nFastStreamer id: {}\nPost id: {}\nMatch score: {}\n\tAnchor score: {}\n\tLocation score: {}\n\t"
+                  "Skills score: {}\n\n".format(m.fast_streamer.identifier, m.post.identifier, m.total,
+                                                ws['anchor'], ws['location'], ws['skills']))
     match_scores = [m.total for m in results['matches']]
-    histo = np.histogram(match_scores, bins=[x for x in range(0, 13)])
+    histo = np.histogram(match_scores, bins=[x for x in range(0, max(match_scores)+1)])
     print(histo[0], "\n", histo[1])
     if env == "test":
         send_email(to_name="Subject X", from_email="test@example.com", to_email="jonathandrewkerr@gmail.com",

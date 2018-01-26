@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Set
 
 
 class FastStreamer:
@@ -30,7 +30,8 @@ class FastStreamer:
 
         self.preferences = Preferences()
 
-    def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: str, sec: bool):
+    def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: str, sec: bool,
+                        departments: Set[str]):
         """
 
         Args:
@@ -40,13 +41,14 @@ class FastStreamer:
             po:
             loc:
             sec:
+            departments:
 
         Returns:
             None
 
         """
         self.preferences = Preferences(anchors=anchors, skills=skills, undertake_dv=dv, want_po=po, location=loc,
-                                       secondment=sec)
+                                       secondment=sec, departments=departments)
 
 
 class Post:
@@ -74,7 +76,7 @@ class Post:
 
 
 class Match:
-    weights_dict = {'anchor': 10, 'location': 2, 'skills': 5}
+    weights_dict = {'anchor': 10, 'location': 2, 'skills': 5, 'department': 2}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -149,8 +151,10 @@ class Match:
             self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
             self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
                                                                           self.fast_streamer.preferences.skills)
+            self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
+                                                                              self.fast_streamer.preferences.departments)
             self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
-                                 'skills': self.skills_match}
+                                 'skills': self.skills_match, 'department': self.department_match}
             self.weighted_scores = self.apply_weighting(weighting_dict=Match.weights_dict)
             self.total = self.create_match_score(self.weighted_scores)
 
@@ -180,11 +184,15 @@ class Match:
 
 class Preferences:
     def __init__(self, anchors: Dict[int, str]=None, skills=None, undertake_dv=False, want_po=False, location=None,
-                 secondment=False):
+                 secondment=False, departments: Set[str]=None):
         if anchors is None:
             self.anchors = {1: "", 2: ""}
         else:
             self.anchors = anchors
+        if departments is None:
+            self.departments = {}
+        else:
+            self.departments = departments
         self.skills = skills
         self.will_undertake_dv = undertake_dv
         self.wants_private_office = want_po
