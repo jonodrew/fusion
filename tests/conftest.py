@@ -60,9 +60,9 @@ def model_fser_with_prefs() -> FastStreamer:
 @pytest.fixture
 def test_data() -> List[Match]:
     if os.getenv("ENVIRONMENT") == "test":
-        amount = 1500
+        amount = 1200
     else:
-        amount = 10
+        amount = 100
     l_p = [Post(skills=random.sample(skills, 2), identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
                 department=random_select(departments)) for i in range(amount)]
