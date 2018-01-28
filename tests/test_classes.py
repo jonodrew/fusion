@@ -1,5 +1,5 @@
 from typing import List, Union
-from app.classes import Match, FastStreamer, Post
+from matching.classes import Match, FastStreamer, Post
 
 
 def random_list(object_to_create: str, number: int) -> List[Union[Post, FastStreamer]]:

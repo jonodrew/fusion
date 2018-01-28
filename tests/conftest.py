@@ -5,7 +5,7 @@ import os
 import itertools
 import pytest
 
-from app.classes import FastStreamer, Post, Match
+from matching.classes import FastStreamer, Post, Match
 
 departments = ['HO', 'DWP', 'HMRC', 'DH', 'CO', 'GDS', 'MOD', 'DDCMS', 'DCLG', 'DEFRA', 'MOJ', 'DFT', 'DFE', 'DFID']
 skills = ['Project and People Management', 'Change Management']

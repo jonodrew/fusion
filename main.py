@@ -7,22 +7,9 @@ from operator import itemgetter
 from typing import List, Dict
 import sendgrid
 import yaml
-from app.classes import Match
+from matching.classes import Match
 from sendgrid.helpers.mail import *
 from tests.conftest import test_data
-
-
-def load_config(environment: str="test") -> Dict[str, str]:
-    my_path = os.path.dirname(__file__)
-    config_path = os.path.join(my_path, '../config.yml')
-    try:
-        with open(config_path, 'r') as ymlfile:
-            print("Success!")
-            c = yaml.load(ymlfile)
-    except FileNotFoundError:
-        c = None
-        pass
-    return c[environment]
 
 
 def send_email(to_name: str, from_email: str, to_email: str, subject: str, content: str,

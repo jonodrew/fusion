@@ -1,0 +1,27 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - fusion</title>
+      {% else %}
+      <title>Welcome to fusion: matching and HR for the Civil Service</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>
+            fusion:
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('login') }}>Login</a>
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>
