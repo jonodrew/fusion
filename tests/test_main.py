@@ -1,4 +1,4 @@
-from app.main import calculate_matches
+from main import calculate_matches
 
 
 def test_calculate_matches(test_data):

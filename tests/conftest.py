@@ -62,7 +62,7 @@ def test_data() -> List[Match]:
     if os.getenv("ENVIRONMENT") == "test":
         amount = 1500
     else:
-        amount = 1500
+        amount = 100
     l_p = [Post(skills=random.sample(skills, 2), identifier=i,
                 anchor=random_select(anchors), clearance=random_select(clearances), location=random_select(locations),
                 department=random_select(departments)) for i in range(amount)]
@@ -71,7 +71,7 @@ def test_data() -> List[Match]:
     for f in l_fs:
         f.set_preferences(skills=random.sample(skills, 2), anchors={1: random_select(anchors),
                                                                     2: random_select(anchors)},
-                          departments=random.sample(departments, 5),
+                          departments=random.sample(departments, 10),
                           loc=random_select(locations), sec=random.choice([True, False]),
                           dv=random.choice([True, False]), po=random.choice([True, False]))
     number = itertools.count().__next__
