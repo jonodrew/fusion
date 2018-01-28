@@ -39,3 +39,13 @@ def test_no_clearance_voids_match_total(model_fser_with_prefs, model_post):
     assert 17 == Match(1, model_post, model_fser_with_prefs).total
     fs = FastStreamer(identifier=1, clearance='BPSS')
     assert 0 == Match(1, post_object=model_post, fser_object=fs).total
+
+
+class TestMatchClass:
+    def test_suitable_location_check(self, model_fser_with_prefs, model_post):
+        m = Match(1, model_post, model_fser_with_prefs)
+        assert m.suitable_location_check()
+        model_fser_with_prefs.location_restriction = True
+        assert m.suitable_location_check()
+        model_post.location = 'Midlands'
+        assert m.suitable_location_check() is False

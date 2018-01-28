@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Set
+from typing import List, Dict, Any, Set, Union
 
 
 class FastStreamer:
@@ -7,20 +7,25 @@ class FastStreamer:
     data for manipulation in the munkres algorithm."""
 
     def __init__(self, identifier: int, skills: List[str]=None, anchors: List[str]=None, restrictions: List[str]=None,
-                 clearance: str=None, departments: List[str]=None, national: bool=True) -> None:
+                 clearance: str=None, departments: List[str]=None, national: bool=True,
+                 location_restriction: bool=False) -> None:
         """
 
-        Args:
-            departments (List[str]): Departments the FastStreamer has previously been in
-            identifier (int): The FastStreamer's unique id.
-            skills (List[str]): The FastStreamer's previous skills.
-            anchors (List[str]): The FastStreamer's previous anchors.
-            restrictions: FastStreamers may have location restrictions due to caring responsibilities
-            clearance (str) : Level of clearance will impact available roles
+        @type anchors: List[str]
+        @type identifier: int
+        @param identifier:
+        @param skills:
+        @param anchors:
+        @param restrictions:
+        @param clearance:
+        @param departments:
+        @param national:
+        @param location_restriction:
         """
         self.identifier = identifier
         self.clearance = clearance
         self.national = national
+        self.location_restriction = location_restriction
         self.profile = {
             'skills': skills,
             'anchors': anchors,
@@ -30,7 +35,7 @@ class FastStreamer:
 
         self.preferences = Preferences()
 
-    def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: str, sec: bool,
+    def set_preferences(self, anchors: Dict[int, str], skills: List[str], dv: bool, po: bool, loc: List[str], sec: bool,
                         departments: Set[str]):
         """
 
@@ -47,7 +52,7 @@ class FastStreamer:
             None
 
         """
-        self.preferences = Preferences(anchors=anchors, skills=skills, undertake_dv=dv, want_po=po, location=loc,
+        self.preferences = Preferences(anchors=anchors, skills=skills, undertake_dv=dv, want_po=po, locations=loc,
                                        secondment=sec, departments=departments)
 
 
@@ -106,7 +111,11 @@ class Match:
 
     @staticmethod
     def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
-        return value_to_check in set(list_to_check)
+        try:
+            r = value_to_check in set(list_to_check)
+        except TypeError:
+            r = True
+        return r
 
     @staticmethod
     def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
@@ -131,8 +140,17 @@ class Match:
         return (not a) or b
 
     @staticmethod
-    def check_any_item_from_list_a_in_list_b(a: List, b: List) -> bool:
+    def check_any_item_from_list_a_in_list_b(a: Union[List[str], Set], b: List) -> bool:
         return bool(set(a).intersection(set(b)))
+
+    def suitable_location_check(self) -> bool:
+        """
+        Checks if FS has location restriction: if so, returns True if it's the location the FS wants, if not, returns
+        False
+        @return: bool
+       """
+        return (not self.fast_streamer.location_restriction) or self.check_x_in_y_list(
+                self.fast_streamer.preferences.locations, self.post.location)
 
     def __init__(self, identifier, post_object: Post=None, fser_object: FastStreamer=None) -> None:
         self.identifier = identifier
@@ -142,13 +160,15 @@ class Match:
                                                  self.fast_streamer.preferences.wants_private_office)
         self.reserved_match = self.boolean_implication(self.post.reserved, self.fast_streamer.national)
         self.clearance_match = self.compare_clearance()
-        if not(self.clearance_match and self.po_match and self.reserved_match):
+        self.suitable_location = self.suitable_location_check()
+        if not(self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
             self.total = 0
+            self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
             # this approach massively improves speed when generating the matrix, but also means that the match cannot
             # later be examined for how good or bad it was
         else:
             self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
-            self.location_match = self.check_if_equal(self.post.location, self.fast_streamer.preferences.location)
+            self.location_match = self.check_x_in_y_list(self.fast_streamer.preferences.locations, self.post.location)
             self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
                                                                           self.fast_streamer.preferences.skills)
             self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
@@ -183,7 +203,7 @@ class Match:
 
 
 class Preferences:
-    def __init__(self, anchors: Dict[int, str]=None, skills=None, undertake_dv=False, want_po=False, location=None,
+    def __init__(self, anchors: Dict[int, str]=None, skills=None, undertake_dv=False, want_po=False, locations=None,
                  secondment=False, departments: Set[str]=None):
         if anchors is None:
             self.anchors = {1: "", 2: ""}
@@ -196,5 +216,5 @@ class Preferences:
         self.skills = skills
         self.will_undertake_dv = undertake_dv
         self.wants_private_office = want_po
-        self.location = location
+        self.locations = locations
         self.secondment = secondment
