@@ -111,3 +111,5 @@ setup\.py
 config\.yml
 
 *.db
+
+config\.py

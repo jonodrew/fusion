@@ -4,7 +4,7 @@ from app import db
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
+    # username = db.Column(db.String(64), index=True, unique=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -13,11 +13,11 @@ class User(db.Model):
 
     __mapper__args__ = {
         'polymorphic_identity': 'user',
-        'polymorphic_on': 'type'
+        'polymorphic_on': type,
     }
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User {}>'.format(self.email)
 
 
 class Department(db.Model):
@@ -30,7 +30,7 @@ class Department(db.Model):
 
 class ActivityManager(User):
     __tablename__ = 'activity_manager'
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), primary_key=True)
     department = db.Column(db.Integer, db.ForeignKey('department.id'))
 
     __mapper_args__ = {
