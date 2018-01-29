@@ -19,6 +19,14 @@
             {{ form.organisation.label }}<br>
             {{ form.organisation(size=32) }}<br>
         </p>
+        <p>
+            {{ form.clearance.label }}<br>
+            {{ form.clearance(size=32) }}<br>
+        </p>
+        <p>
+            {{ form.private_office() }}{{ form.private_office.label }}
+        </p>
+
         <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}
