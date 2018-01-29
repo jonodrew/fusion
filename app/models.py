@@ -20,19 +20,43 @@ class User(db.Model):
         return '<User {}>'.format(self.email)
 
 
-class Department(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.VARCHAR(1024), index=True, unique=True)
-
-    def __repr__(self):
-        return '<Department {}'.format(self.name)
-
-
 class ActivityManager(User):
     __tablename__ = 'activity_manager'
     id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), primary_key=True)
-    department = db.Column(db.Integer, db.ForeignKey('department.id'))
+    organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))
 
     __mapper_args__ = {
         'polymorphic_identity': 'activity_manager',
+    }
+
+
+class Candidate(User):
+    id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), primary_key=True)
+    staff_number = db.Column(db.Integer, unique=True)
+
+    __mapper__args__ = {
+        'polymorphic_identity': 'candidate',
+    }
+
+
+class Organisation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(1024), index=True, unique=True)
+    type = db.Column(db.String(128))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'organisation',
+        'polymorphic_on': type,
+    }
+
+    def __repr__(self):
+        return '<Organisation {}'.format(self.name)
+
+
+class Department(Organisation):
+    id = db.Column(db.Integer, db.ForeignKey('organisation.id'), primary_key=True)
+    parent_dept = db.Column(db.String(256))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'department',
     }
