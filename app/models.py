@@ -4,7 +4,6 @@ from app import db
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    # username = db.Column(db.String(64), index=True, unique=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -60,3 +59,12 @@ class Department(Organisation):
     __mapper_args__ = {
         'polymorphic_identity': 'department',
     }
+
+
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))
+    description = db.Column(db.Text)
+    responsibilities = db.Column(db.Text)
+    # region = db.Column(db.Integer, db.ForeignKey('region.id'))
+
