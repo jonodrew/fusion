@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired
 
 
@@ -14,6 +14,9 @@ class RoleForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     organisation = StringField("Name of the organisation offering the role")  # should this be a dropdown?
     submit = SubmitField('Submit post for validation')
+    context = TextAreaField(
+        label="Please give some context for this role. For example, what are the team's objectives? "
+              "What is its wider purpose or mission statement?")
 
 
 class DepartmentalRoleForm(RoleForm):

@@ -22,6 +22,10 @@
         <p>
             {{ form.private_office() }}{{ form.private_office.label }}
         </p>
+    <p>
+        {{ form.context.label }}<br>
+        {{ form.context(cols="20", rows="5") }}<br>
+    </p>
 
         <p>{{ form.submit() }}</p>
     </form>
