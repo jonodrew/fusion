@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 
 
@@ -17,7 +17,7 @@ class RoleForm(FlaskForm):
 
 
 class DepartmentalRoleForm(RoleForm):
-    clearance = StringField("Clearance required for this role", description="If your organisation is non-governmental, "
-                                                                            "please leave this field blank")
+    clearance = SelectField(label="Clearance required for this role",
+                            choices=[("CTC", "Counter-Terrorism Check"), ("DV", "Developed Vetting"),
+                                     ("BPSS", "Baseline Personnel Security Standard"), ("SC", "Security check")])
     private_office = BooleanField(label="Is this a Private Office post?")
-

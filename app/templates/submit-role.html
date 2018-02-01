@@ -12,16 +12,12 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.clearance.label }}<br>
-            {{ form.clearance(size=32) }}<br>
-        </p>
-        <p>
             {{ form.organisation.label }}<br>
             {{ form.organisation(size=32) }}<br>
         </p>
         <p>
             {{ form.clearance.label }}<br>
-            {{ form.clearance(size=32) }}<br>
+            {{ form.clearance() }}<br>
         </p>
         <p>
             {{ form.private_office() }}{{ form.private_office.label }}
