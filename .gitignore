@@ -112,8 +112,6 @@ config\.yml
 
 *.db
 
-config\.py
-
 govuk_template/
 
 assets/images/
