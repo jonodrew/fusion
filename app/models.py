@@ -79,9 +79,6 @@ class Department(Organisation):
     }
 
 
-
-
-
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))

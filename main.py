@@ -1,47 +1,46 @@
-import random
-import sys
-
 import itertools
-import munkres
-import numpy as np
 import os
+import sys
 import time
 from operator import itemgetter
 from typing import List, Dict
-import sendgrid
 from config import Config
-from matching.classes import Match, Post, FastStreamer
+import munkres
+import numpy as np
+import sendgrid
 from sendgrid.helpers.mail import *
-from tests.conftest import departments, skills, locations, anchors, clearances, test_data
+
+from matching.classes import Match
+from tests.conftest import test_data
 
 
-def send_email(to_name: str, from_email: str, to_email: str, subject: str, content: str,
-               env_name: str = "test") -> Dict[str, str]:
-    """
-    This function sends an email using the SendGrid API
-    Args:
-        to_name: the name of the individual to whom the email is being sent
-        from_email: the email from which the email is sent
-        to_email: the email address of the individual to whom the email is being sent
-        subject: subject of email
-        content: content
-        env_name: environment name; either 'test' or 'production'
-
-    Returns:
-        Dict[str, str]: Dictionary containing HTTP response
-
-    """
-    content = Content("text/plain", content)
-    try:
-        cfg = load_config(env_name)
-        sendgrid_api = cfg.get("sendgrid").get("api")
-    except FileNotFoundError:
-        sendgrid_api = os.getenv("SENDGRID_API")
-    sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api)
-    from_email = Email(from_email, name="Fusion Admin")
-    to_email = Email(to_email, to_name)
-    m = Mail(from_email, subject, to_email, content)
-    return sg.client.mail.send.post(request_body=m.get())
+# def send_email(to_name: str, from_email: str, to_email: str, subject: str, content: str,
+#                env_name: str = "test") -> Dict[str, str]:
+#     """
+#     This function sends an email using the SendGrid API
+#     Args:
+#         to_name: the name of the individual to whom the email is being sent
+#         from_email: the email from which the email is sent
+#         to_email: the email address of the individual to whom the email is being sent
+#         subject: subject of email
+#         content: content
+#         env_name: environment name; either 'test' or 'production'
+#
+#     Returns:
+#         Dict[str, str]: Dictionary containing HTTP response
+#
+#     """
+#     content = Content("text/plain", content)
+#     try:
+#         cfg = Config
+#         sendgrid_api = cfg.get("sendgrid").get("api")
+#     except FileNotFoundError:
+#         sendgrid_api = os.getenv("SENDGRID_API")
+#     sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api)
+#     from_email = Email(from_email, name="Fusion Admin")
+#     to_email = Email(to_email, to_name)
+#     m = Mail(from_email, subject, to_email, content)
+#     return sg.client.mail.send.post(request_body=m.get())
 
 
 def calculate_aggregate_match_score(matched_list: List[int]) -> int:
@@ -115,9 +114,9 @@ def main():
     match_scores = [m.total for m in results['matches']]
     histo = np.histogram(match_scores, bins=[x for x in range(0, max(match_scores) + 1)])
     print(histo[0], "\n", histo[1])
-    if env == "test":
-        send_email(to_name="Subject X", from_email="test@example.com", to_email="jonathandrewkerr@gmail.com",
-                   subject="Test", content="Hello world")
+    # if env == "test":
+    #     send_email(to_name="Subject X", from_email="test@example.com", to_email="jonathandrewkerr@gmail.com",
+    #                subject="Test", content="Hello world")
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
-"""initial
+"""setting up mysql
 
-Revision ID: bb37279ca9ac
+Revision ID: 432ed2b24f0d
 Revises: 
-Create Date: 2018-02-02 02:01:18.408203
+Create Date: 2018-02-02 14:11:46.266199
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bb37279ca9ac'
+revision = '432ed2b24f0d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,7 +25,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_organisation_name'), 'organisation', ['name'], unique=True)
-    op.create_table('user',
+    op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('first_name', sa.String(length=64), nullable=True),
     sa.Column('last_name', sa.String(length=64), nullable=True),
@@ -34,20 +34,20 @@ def upgrade():
     sa.Column('type', sa.String(length=24), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
-    op.create_index(op.f('ix_user_first_name'), 'user', ['first_name'], unique=False)
-    op.create_index(op.f('ix_user_last_name'), 'user', ['last_name'], unique=False)
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_first_name'), 'users', ['first_name'], unique=False)
+    op.create_index(op.f('ix_users_last_name'), 'users', ['last_name'], unique=False)
     op.create_table('activity_manager',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('organisation', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['id'], ['user.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['id'], ['users.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['organisation'], ['organisation.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('candidate',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('staff_number', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['id'], ['user.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('staff_number')
     )
@@ -74,10 +74,10 @@ def downgrade():
     op.drop_table('department')
     op.drop_table('candidate')
     op.drop_table('activity_manager')
-    op.drop_index(op.f('ix_user_last_name'), table_name='user')
-    op.drop_index(op.f('ix_user_first_name'), table_name='user')
-    op.drop_index(op.f('ix_user_email'), table_name='user')
-    op.drop_table('user')
+    op.drop_index(op.f('ix_users_last_name'), table_name='users')
+    op.drop_index(op.f('ix_users_first_name'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
     op.drop_index(op.f('ix_organisation_name'), table_name='organisation')
     op.drop_table('organisation')
     # ### end Alembic commands ###
