@@ -1,10 +1,10 @@
 from flask_login import current_user, login_user
 from werkzeug.urls import url_parse
 
-from app import app
+from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.forms import LoginForm, DepartmentalRoleForm
-from app.models import User
+from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm
+from app.models import User, Candidate
 from flask_login import logout_user, login_required
 
 
@@ -12,8 +12,7 @@ from flask_login import logout_user, login_required
 @app.route('/index')
 @login_required
 def index():
-    user = {'username': 'jonathandrewkerr+admin@gmail.com'}
-    return render_template('index.html', title="Home", user=user)
+    return render_template('index.html', title="Home")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -47,3 +46,37 @@ def submit_role():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    """passes user through to correct registration form.
+    TODO: WRITE FORMS
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegisterAsForm()
+    if form.validate_on_submit():
+        if form.type_of_user.data == 'cohort leader':
+            pass
+        elif form.type_of_user.data == 'activity manager':
+            return redirect(url_for('register_as_activity_manager'))
+        else:
+            return redirect(url_for('register_as_candidate'))
+    return render_template('register.html', title='What kid of user are you?', form=form)
+
+
+@app.route('/register-as-candidate', methods=['GET', 'POST'])
+def register_as_candidate():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        candidate = Candidate()
+        form.populate_obj(candidate)
+        candidate.set_password(form.password.data)
+        db.session.add(candidate)
+        db.session.commit()
+        flash("Congratulations, you've registered successfully")
+        return redirect(url_for('login'))
+    return render_template('register-as-candidate.html', title='Register as a candidate', form=form)

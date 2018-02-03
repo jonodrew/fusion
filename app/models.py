@@ -55,7 +55,7 @@ class Candidate(User):
     }
 
 
-class Organisation(db.Model):
+class Organisation(db.Model, Base):
     __tablename__ = 'organisation'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(1024), index=True, unique=True)
