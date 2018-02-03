@@ -80,3 +80,14 @@ def register_as_candidate():
         flash("Congratulations, you've registered successfully")
         return redirect(url_for('login'))
     return render_template('register-as-candidate.html', title='Register as a candidate', form=form)
+
+
+@app.route('/user/<user_id>')
+@login_required
+def user(user_id):
+    user = User.query.filter_by(id=user_id).first_or_404()
+    posts = [
+        {'department': 'Home Office', 'anchor': 'Digital', 'score': 'Achieved'},
+        {'department': 'HMRC', 'anchor': 'Policy', 'score': 'Exceeded'}
+    ]
+    return render_template('user.html', user=user, posts=posts)

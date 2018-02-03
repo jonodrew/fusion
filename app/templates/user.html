@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+    <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+    <hr>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Department
+                </th>
+                <th>
+                    Anchor
+                </th>
+                <th>
+                    Score
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <tr>
+                <td>
+                    {{ post.department }}
+                </td>
+                <td>
+                    {{ post.anchor }}
+                </td>
+                <td>
+                    {{ post.score }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
