@@ -5,6 +5,7 @@ from flask import render_template, flash, redirect, url_for, request
 from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm, PreferencesForm
 from app.models import User, Candidate, Preferences
 from flask_login import logout_user, login_required
+import datetime as dt
 
 
 @app.route('/')
@@ -102,6 +103,7 @@ def submit_preferences():
         open_form.skill1 = form.skill1.data
         open_form.skill2 = form.skill2.data
         open_form.completed = True
+        open_form.completed_date = dt.datetime.today()
         db.session.commit()
         return redirect(url_for('profile'))
     return render_template('preferences.html', title='Submit my preferences', form=form, form_available=bool(open_form))

@@ -92,6 +92,7 @@ class Preferences(db.Model, Base):
     candidate_id = db.Column(db.ForeignKey('users.id'))
     open_date = db.Column(db.DateTime())
     close_date = db.Column(db.DateTime())
+    completed_date = db.Column(db.DateTime())
     completed = db.Column(db.Boolean())
     skill1 = db.Column(db.String(64))
     skill2 = db.Column(db.String(64))
