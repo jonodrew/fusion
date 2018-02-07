@@ -3,6 +3,11 @@
 {% block app_content %}
     <h1>{{ user.first_name }} {{ user.last_name }}</h1>
     <hr>
+    {% if form_available %}
+        <h2>
+            <a href="{{ url_for('submit_preferences') }}">Please complete your preferences form before 25 February</a>
+        </h2>
+    {% endif %}
     <table class="table">
         <thead>
             <tr>
@@ -12,9 +17,11 @@
                 <th>
                     Anchor
                 </th>
+                {% if current_user.id == user.id %}
                 <th>
                     Score
                 </th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -26,9 +33,11 @@
                 <td>
                     {{ post.anchor }}
                 </td>
+                {% if current_user.id == user.id %}
                 <td>
                     {{ post.score }}
                 </td>
+            {% endif %}
             </tr>
             {% endfor %}
         </tbody>

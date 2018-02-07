@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, RadioField
 from wtforms.validators import DataRequired, EqualTo, ValidationError
 
 from app.models import User
@@ -22,17 +22,18 @@ class RoleForm(FlaskForm):
 
 class DepartmentalRoleForm(RoleForm):
     clearance = SelectField(label="Clearance required for this role",
-                            choices=[("CTC", "Counter-Terrorism Check"), ("DV", "Developed Vetting"),
-                                     ("BPSS", "Baseline Personnel Security Standard"), ("SC", "Security check")])
+                            choices=[("BPSS", "Baseline Personnel Security Standard"),
+                                     ("CTC", "Counter-Terrorism Check"), ("SC", "Security check"),
+                                     ("DV", "Developed Vetting")])
     private_office = BooleanField(label="This is a Private Office post")
     submit = SubmitField('Submit post for validation')
 
 
 class RegisterAsForm(FlaskForm):
-    type_of_user = SelectField(label="Please indicate the type of user you are. If you indicate that you are a cohort "
-                                     "leader, an email will be sent to your HR team for approval.",
-                               choices=[('candidate', 'Fast Streamer'), ('activity manager', 'Activity Manager'),
-                                        ('cohort leader', 'Cohort Leader')])
+    type_of_user = RadioField(label="Please indicate the type of user you are. If you indicate that you are a cohort "
+                                    "leader, an email will be sent to your HR team for approval.",
+                              choices=[('candidate', 'Fast Streamer'), ('activity manager', 'Activity Manager'),
+                                       ('cohort leader', 'Cohort Leader')])
     submit = SubmitField('Next')
 
 
@@ -49,3 +50,27 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('It looks like you\'re already registered. Have you tried logging in?')
+
+
+class PreferencesForm(FlaskForm):
+    from tests.conftest import skills
+    skills_list = list(zip(skills, skills))
+    skill1 = SelectField(label="Your first skill preference", choices=skills_list)
+    skill2 = SelectField(label="Your second skill preference. Please do not choose the same skill as above.",
+                         choices=skills_list)
+    submit = SubmitField("Register my preferences")
+    # TODO: Skills should not be the same
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+        result = True
+        seen = set()
+        for field in [self.skill1, self.skill2]:
+            print(field.data)
+            if field.data in seen:
+                field.errors.append('Please select two different skills.')
+                result = False
+            else:
+                seen.add(field.data)
+        return result

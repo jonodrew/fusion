@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+<h1>
+    {{ title }}
+</h1>
+    <div class="row">
+    {% if form_available %}
+        <div class= "col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    {% else %}
+    <h2>
+        You don't currently have any preferences forms to complete.
+    </h2>
+        <div class="col-md-4">
+            <p>
+                If you think this is incorrect, or you'd like to
+                change your most recent preferences form, please speak to your Cohort Leader.
+
+            </p>
+        </div>
+    {% endif %}
+    </div>
+
+{% endblock %}

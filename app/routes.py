@@ -1,10 +1,9 @@
 from flask_login import current_user, login_user
 from werkzeug.urls import url_parse
-
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm
-from app.models import User, Candidate
+from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm, PreferencesForm
+from app.models import User, Candidate, Preferences
 from flask_login import logout_user, login_required
 
 
@@ -82,12 +81,29 @@ def register_as_candidate():
     return render_template('register-as-candidate.html', title='Register as a candidate', form=form)
 
 
-@app.route('/user/<user_id>')
+@app.route('/profile')
 @login_required
-def user(user_id):
-    user = User.query.filter_by(id=user_id).first_or_404()
+def profile():
+    open_form = bool(Preferences.query.filter_by(candidate_id=current_user.get_id(), completed=False).count())
+    user = User.query.filter_by(id=current_user.id).first_or_404()
     posts = [
         {'department': 'Home Office', 'anchor': 'Digital', 'score': 'Achieved'},
         {'department': 'HMRC', 'anchor': 'Policy', 'score': 'Exceeded'}
     ]
-    return render_template('user.html', user=user, posts=posts)
+    return render_template('profile.html', user=user, posts=posts, form_available=open_form)
+
+
+@app.route('/submit-preferences', methods=['POST', 'GET'])
+@login_required
+def submit_preferences():
+    open_form = Preferences.query.filter_by(candidate_id=current_user.get_id(), completed=False).first()
+    form = PreferencesForm()
+    if form.validate_on_submit():
+        open_form.skill1 = form.skill1.data
+        open_form.skill2 = form.skill2.data
+        open_form.completed = True
+        db.session.commit()
+        return redirect(url_for('profile'))
+    return render_template('preferences.html', title='Submit my preferences', form=form, form_available=bool(open_form))
+
+

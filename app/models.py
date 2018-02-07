@@ -86,3 +86,17 @@ class Role(db.Model):
     responsibilities = db.Column(db.Text)
     # region = db.Column(db.Integer, db.ForeignKey('region.id'))
 
+
+class Preferences(db.Model, Base):
+    id = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.ForeignKey('users.id'))
+    open_date = db.Column(db.DateTime())
+    close_date = db.Column(db.DateTime())
+    completed = db.Column(db.Boolean())
+    skill1 = db.Column(db.String(64))
+    skill2 = db.Column(db.String(64))
+
+    def has_form_to_complete(self, cid):
+        form = Preferences.query.filter_by(self.candidate_id == cid).all()
+        for f in form:
+            print(f.completed)
