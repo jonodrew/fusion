@@ -96,6 +96,7 @@ class Preferences(db.Model, Base):
     completed = db.Column(db.Boolean())
     skill1 = db.Column(db.String(64))
     skill2 = db.Column(db.String(64))
+    want_private_office = db.Column(db.Boolean())
 
     def has_form_to_complete(self, cid):
         form = Preferences.query.filter_by(self.candidate_id == cid).all()

@@ -104,6 +104,7 @@ def submit_preferences():
         open_form.skill2 = form.skill2.data
         open_form.completed = True
         open_form.completed_date = dt.datetime.today()
+        open_form.want_private_office = form.private_office.data
         db.session.commit()
         return redirect(url_for('profile'))
     return render_template('preferences.html', title='Submit my preferences', form=form, form_available=bool(open_form))

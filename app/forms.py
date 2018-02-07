@@ -58,6 +58,7 @@ class PreferencesForm(FlaskForm):
     skill1 = SelectField(label="Your first skill preference", choices=skills_list)
     skill2 = SelectField(label="Your second skill preference. Please do not choose the same skill as above.",
                          choices=skills_list)
+    private_office = BooleanField(label="I'd like a Private Office role")
     submit = SubmitField("Register my preferences")
     # TODO: Skills should not be the same
 
