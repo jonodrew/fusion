@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-{% block content %}
+{% block app_content %}
     <div class="col-md-4">
-    <h1>Hi, {{ current_user.first_name }}!</h1>
+    <h1>Hi {{ current_user.first_name }}!</h1>
     {% for post in posts %}
     <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
 

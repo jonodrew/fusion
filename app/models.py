@@ -37,7 +37,7 @@ class User(db.Model, UserMixin, Base):
 
 
 class ActivityManager(User):
-    __tablename__ = 'activity_manager'
+    __tablename__ = 'activity_managers'
     __mapper_args__ = {
         'polymorphic_identity': 'activity manager',
     }
@@ -46,14 +46,40 @@ class ActivityManager(User):
 
 
 class Candidate(User):
-    __tablename__ = 'candidate'
-    id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    __tablename__ = 'candidates'
+    user_id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True, nullable=False)
     staff_number = db.Column(db.Integer, unique=True)
+    specialism = db.Column(db.Integer, db.ForeignKey('specialisms.id'))
+    line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+
+    line_manager = db.relationship("User", foreign_keys=[line_manager_id])
+    user = db.relationship("User", foreign_keys=[user_id])
 
     __mapper_args__ = {
+        'inherit_condition': (user_id == User.id),
         'polymorphic_identity': 'candidate'
     }
 
+
+class CohortLeader(User):
+    __tablename__ = 'cohort_leaders'
+    id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'cohort_leader',
+        'inherit_condition': (id == User.id)
+    }
+
+
+class SchemeLeader(User):
+    __tablename__ = 'scheme_leaders'
+    id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    specialism = db.Column(db.Integer, db.ForeignKey('specialisms.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'scheme_leader',
+        'inherit_condition': (id == User.id)
+    }
 
 class Organisation(db.Model, Base):
     __tablename__ = 'organisation'
@@ -102,3 +128,9 @@ class Preferences(db.Model, Base):
         form = Preferences.query.filter_by(self.candidate_id == cid).all()
         for f in form:
             print(f.completed)
+
+
+class Specialism(db.Model, Base):
+    __tablename__ = 'specialisms'
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String(28))
