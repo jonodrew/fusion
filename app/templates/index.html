@@ -2,11 +2,49 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-    <div class="col-md-4">
+    <div class="col-md-8">
     <h1>Hi {{ current_user.first_name }}!</h1>
-    {% for post in posts %}
-    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
-
-    {% endfor %}
+    <hr>
+    {% if action %}
+        {% if current_user.type == 'cohort_leader' %}
+            <h2>Members of your cohort who haven't completed their preferences form</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in action %}
+                    <tr>
+                        <td>
+                            {{ person.first_name }} {{ person.last_name }}
+                        </td>
+                        <td>
+                            {{ person.email }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif current_user.type == 'candidate' %}
+            <h2>
+            <a href="{{ url_for(action.url) }}">Please follow this link to complete your outstanding actions</a>
+        </h2>
+        {% endif %}
+    {% else %}
+        <h2>
+            You have no outstanding actions right now
+        </h2>
+        <p>
+            Everything's going great. You'll get an email if anything changes.
+        </p>
+    {% endif %}
     </div>
+
 {% endblock %}

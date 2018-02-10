@@ -12,7 +12,16 @@ import datetime as dt
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html', title="Home")
+    if current_user.type == 'cohort_leader':
+        action = Candidate.query.filter_by(line_manager_id=current_user.id).join(Preferences).\
+            filter_by(completed=False).all()
+    elif current_user.type == 'candidate':
+        action = Preferences.query.filter(Preferences.candidate_id == current_user.id, Preferences.completed == False)\
+            .first()
+    else:
+        action = None
+    print(action)
+    return render_template('index.html', title="Home", action=action)
 
 
 @app.route('/login', methods=['GET', 'POST'])

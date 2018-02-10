@@ -43,8 +43,10 @@
                 <div class="alert alert-info" role="alert">{{ message }}</div>
             {% endfor %}
         {% endif %}
-        {% endwith %}
+    {% endwith %}
     {# application content goes in these blocks #}
+    <div class="col-md-8">
     {% block app_content %}{% endblock %}
+    </div>
     </div>
 {% endblock %}
