@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.ext.declarative import declarative_base
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -54,11 +56,16 @@ class Candidate(User):
 
     line_manager = db.relationship("User", foreign_keys=[line_manager_id])
     user = db.relationship("User", foreign_keys=[user_id])
+    preference_forms = db.relationship('Preferences', backref='owner', lazy='dynamic')
 
     __mapper_args__ = {
         'inherit_condition': (user_id == User.id),
         'polymorphic_identity': 'candidate'
     }
+
+    def get_open_forms(self):
+        return self.preference_forms.filter(Preferences.close_date >= datetime.datetime.today(),
+                                                  Preferences.completed == False).all()
 
 
 class CohortLeader(User):
@@ -69,6 +76,9 @@ class CohortLeader(User):
         'polymorphic_identity': 'cohort_leader',
         'inherit_condition': (id == User.id)
     }
+
+    def get_cohort(self):
+        return Candidate.query.filter(Candidate.line_manager_id == self.id).all()
 
 
 class SchemeLeader(User):
