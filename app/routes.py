@@ -1,11 +1,12 @@
 from flask_login import current_user, login_user
 from werkzeug.urls import url_parse
 from app import app, db
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, abort
 from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm, PreferencesForm
 from app.models import User, Candidate, Preferences
 from flask_login import logout_user, login_required
 import datetime as dt
+from .email import send_email_confirmation
 
 
 @app.route('/')
@@ -60,18 +61,19 @@ def logout():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     """passes user through to correct registration form.
-    TODO: WRITE FORMS
     """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegisterAsForm()
     if form.validate_on_submit():
         if form.type_of_user.data == 'cohort leader':
-            pass
+            abort(404)
         elif form.type_of_user.data == 'activity manager':
-            return redirect(url_for('register_as_activity_manager'))
+            redirect_url = 'register_as_activity_manager'
         else:
-            return redirect(url_for('register_as_candidate'))
+            redirect_url = 'register_as_candidate'
+        return redirect(url_for(redirect_url))
+
     return render_template('register.html', title='What kid of user are you?', form=form)
 
 
@@ -86,7 +88,8 @@ def register_as_candidate():
         candidate.set_password(form.password.data)
         db.session.add(candidate)
         db.session.commit()
-        flash("Congratulations, you've registered successfully")
+        send_email_confirmation(candidate)
+        flash("Congratulations, you've registered successfully. Now check your email to confirm your email")
         return redirect(url_for('login'))
     return render_template('register-as-candidate.html', title='Register as a candidate', form=form)
 

@@ -1,9 +1,11 @@
 import datetime
 
 from sqlalchemy.ext.declarative import declarative_base
-from app import db, login
+from app import db, login, app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from time import time
+import jwt
 
 
 @login.user_loader
@@ -22,6 +24,7 @@ class User(db.Model, UserMixin, Base):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     type = db.Column(db.String(24), nullable=False)
+    confirmed = db.Column(db.Boolean, default=False, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_on': type,
@@ -36,6 +39,19 @@ class User(db.Model, UserMixin, Base):
 
     def check_password(self, password) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    def generate_token(self, redirect: str, expiration=3600):
+        return jwt.encode(
+            {redirect: self.id, 'exp': time() + expiration},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def validate_token(token:str, redirect:str):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])[redirect]
+        except:
+            return None
+        return User.query.get(id)
 
 
 class ActivityManager(User):

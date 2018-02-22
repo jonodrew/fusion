@@ -8,7 +8,11 @@
     <div class="row">
         <div class= "col-md-4">
             {{ wtf.quick_form(form) }}
+            <br>
+            New around here? Register by<a href="{{ url_for('register') }}"> following this link</a>
         </div>
+
     </div>
+
 
 {% endblock %}
