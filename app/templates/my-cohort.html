@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+    <h2>
+        This is your cohort
+    </h2>
+    <br>
+    <br>
+    <div class="col-md-0">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Specialism</th>
+                    <th>Role</th>
+                    <th>Department/Organisation</th>
+                    <th>Location</th>
+                <tr>
+            </thead>
+            <tbody>
+                {% for point in data %}
+                    <tr>
+                        <td>
+                            {{ point['name'] }}
+                        </td>
+                        <td>
+                            {{ point['specialism'] }}
+                        </td>
+                        <td>
+                            {{ point['role']['name'] }}
+                        </td>
+                        <td>
+                            {{ point['role']['organisation'] }}
+                        </td>
+                        <td>
+                            {{ point['role']['location'] }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}
