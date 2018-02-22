@@ -2,11 +2,12 @@ from flask_login import current_user, login_user
 from werkzeug.urls import url_parse
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request, abort
-from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm, PreferencesForm
+from app.forms import LoginForm, DepartmentalRoleForm, RegistrationForm, RegisterAsForm, PreferencesForm, \
+    ResetPasswordRequestForm
 from app.models import User, Candidate, Preferences
 from flask_login import logout_user, login_required
 import datetime as dt
-from .email import send_email_confirmation
+from .email import send_email_confirmation, send_password_reset_email
 
 
 @app.route('/')
@@ -147,3 +148,17 @@ def my_cohort():
 
     ]
     return render_template('my-cohort.html', data=cohort)
+
+
+@app.route('/reset-password-request', methods=['POST', 'GET'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Check your email for the instructions to reset your password')
+        return redirect(url_for('login'))
+    return render_template('reset-password-request.html', title='Reset Password', form=form)

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, RadioField
-from wtforms.validators import DataRequired, EqualTo, ValidationError
+from wtforms.validators import DataRequired, EqualTo, ValidationError, Email
 
 from app.models import User
 
@@ -75,3 +75,8 @@ class PreferencesForm(FlaskForm):
             else:
                 seen.add(field.data)
         return result
+
+
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
