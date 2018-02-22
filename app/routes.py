@@ -119,3 +119,28 @@ def submit_preferences():
     return render_template('preferences.html', title='Submit my preferences', form=form, form_available=bool(open_form))
 
 
+@app.route('/my-cohort')
+@login_required
+def my_cohort():
+    cohort = [
+        {
+            'name': 'Frank Jones',
+            'specialism': 'Digital',
+            'role': {
+                'name': 'Scrum Master',
+                'organisation': 'HMRC',
+                'location': 'Worthing'
+            }
+        },
+        {
+            'name': 'Farah Ahmed',
+            'specialism': 'Digital',
+            'role': {
+                'name': 'CyberOps',
+                'organisation': 'DWP',
+                'location': 'Blackpool'
+            }
+        }
+
+    ]
+    return render_template('my-cohort.html', data=cohort)
