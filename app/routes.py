@@ -87,8 +87,8 @@ def register_as_candidate():
         candidate = Candidate()
         form.populate_obj(candidate)
         candidate.set_password(form.password.data)
-        db.session.add(candidate)
-        db.session.commit()
+        # db.session.add(candidate)
+        # db.session.commit()
         send_email_confirmation(candidate)
         flash("Congratulations, you've registered successfully. Now check your email to confirm your email")
         return redirect(url_for('login'))
@@ -162,3 +162,8 @@ def reset_password_request():
         flash('Check your email for the instructions to reset your password')
         return redirect(url_for('login'))
     return render_template('reset-password-request.html', title='Reset Password', form=form)
+
+
+@app.route('/confirm-email/<token>/')
+def confirm_email():
+    pass
