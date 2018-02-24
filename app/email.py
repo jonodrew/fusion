@@ -3,7 +3,7 @@ from typing import Dict, Any
 from python_http_client import exceptions
 
 from app.models import User
-from sendgrid.helpers.mail import Content, Email, Mail, Substitution, Personalization
+from sendgrid.helpers.mail import Content, Email, Mail, Substitution, MailSettings, SandBoxMode
 import sendgrid
 import os
 
@@ -22,9 +22,7 @@ def send_email(user: User, subject: str, from_email: str, substitutions: [Dict[A
        Dict[str, str]: Dictionary containing HTTP response
 
     """
-    print(content)
     content = Content("text/html", content)
-    print(content.value)
     sendgrid_api = os.getenv("SENDGRID_API")
     sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api)
     from_email = Email(from_email, name="Service Admin")
@@ -33,8 +31,10 @@ def send_email(user: User, subject: str, from_email: str, substitutions: [Dict[A
     for key, value in substitutions.items():
         print(key, value)
         m.personalizations[0].add_substitution(Substitution(key, value))
-    if os.environ.get('ENV') == 'TEST':
-        m.mail_settings['sandbox_mode']['enable'] = True
+    if os.environ.get('ENV') == 'test':
+        settings = MailSettings()
+        settings.sandbox_mode = SandBoxMode(enable=True)
+        m.mail_settings = settings
     m.template_id = '5a1b969f-77c5-4d27-8b6e-e77c9c237a8e'
     try:
         response = sg.client.mail.send.post(request_body=m.get())
