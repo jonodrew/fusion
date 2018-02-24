@@ -1,4 +1,3 @@
-secrets
 alembic==0.9.7
 attrs==17.4.0
 cffi==1.11.4

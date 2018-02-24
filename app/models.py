@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from time import time
 import jwt
+from . import db as database
 
 
 @login.user_loader
@@ -45,13 +46,27 @@ class User(db.Model, UserMixin, Base):
             {redirect: self.id, 'exp': time() + expiration},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
+    def set_confirmed(self) -> None:
+        self.confirmed = True
+
     @staticmethod
-    def validate_token(token:str, redirect:str):
+    def validate_token(token: str, redirect: str):
         try:
             id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])[redirect]
         except:
             return None
         return User.query.get(id)
+
+    def confirm_user(self, token: str):
+        u = User.validate_token(token, 'confirm_email')
+        if u.id == self.id:
+            self.set_confirmed()
+            database.session.add(self)
+            database.session.commit()
+            return True
+        else:
+            print('Error')
+        return None
 
 
 class ActivityManager(User):
