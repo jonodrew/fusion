@@ -60,8 +60,8 @@ def model_fser_with_prefs() -> FastStreamer:
 
 @pytest.fixture
 def test_data() -> Tuple[List[Match], List[FastStreamer], List[Post]]:
-    if os.getenv("ENVIRONMENT") == "test":
-        amount = 1500
+    if os.getenv("ENV") == "test":
+        amount = 500
     else:
         amount = 100
     l_p = [Post(skills=random.sample(skills, 2), identifier=i,
