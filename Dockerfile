@@ -4,4 +4,5 @@ WORKDIR webapp
 RUN pip install -r requirements.txt
 RUN pwd
 RUN ls
-ENTRYPOINT python main.py
+ENV FLASK_APP fusion.py
+CMD ["flask", "run", "--host=0.0.0.0"]
