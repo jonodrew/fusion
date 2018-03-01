@@ -4,6 +4,12 @@ from wtforms.validators import DataRequired, EqualTo, ValidationError, Email
 
 from app.models import User
 
+departments = ['HO', 'DWP', 'HMRC', 'DH', 'CO', 'GDS', 'MOD', 'DDCMS', 'DCLG', 'DEFRA', 'MOJ', 'DFT', 'DFE', 'DFID']
+skills = ['Software Engineering', 'User Research', 'Strategy & Policy', 'Product Design', 'Content & Analysis',
+          'Delivery', 'Operations', 'Commercial Management']
+anchors = ['Digital', 'Corporate', 'Operations']
+locations = ['London', 'South West', 'Midlands', 'Scotland', 'The North', 'Overseas']
+clearances = ['BPSS', 'CTC', 'SC', 'DV']
 
 class RoleForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
@@ -23,7 +29,6 @@ class DepartmentalRoleForm(RoleForm):
 
 
 class PreferencesForm(FlaskForm):
-    from tests.conftest import skills
     skills_list = list(zip(skills, skills))
     skill1 = SelectField(label="Your first skill preference", choices=skills_list)
     skill2 = SelectField(label="Your second skill preference. Please do not choose the same skill as above.",

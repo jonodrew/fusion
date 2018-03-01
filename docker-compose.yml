@@ -2,6 +2,7 @@ version: '3'
 services:
   web:
     build: .
+    command: flask run --host=0.0.0.0
     volumes:
       - .:/webapp
     ports:
@@ -10,4 +11,7 @@ services:
       - db
 
   db:
-    image: postgres:latest
+    build:
+      ./postgresql
+    container_name: match-post-local
+    restart: always
