@@ -1,7 +1,5 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
-import logging
-from logging.handlers import RotatingFileHandler
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
