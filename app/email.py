@@ -23,7 +23,7 @@ def send_email(user: User, subject: str, from_email: str, substitutions: [Dict[A
 
     """
     content = Content("text/html", content)
-    sendgrid_api = os.getenv("SENDGRID_API")
+    sendgrid_api = os.getenv("SENDGRID_API_KEY")
     sg = sendgrid.SendGridAPIClient(apikey=sendgrid_api)
     from_email = Email(from_email, name="Service Admin")
     to_email = Email(user.email, user.first_name)
