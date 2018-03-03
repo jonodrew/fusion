@@ -1,13 +1,14 @@
 version: '3'
 services:
   web:
-    build: ./app
+    build: .
     restart: always
     environment:
       - FLASK_DEBUG=1
+      - ENV=test
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
-      - .:/webapp
+      - ./app:/home/match-post-service/app
     ports:
       - "5000:5000"
     depends_on:

@@ -1,7 +1,6 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import redirect, render_template, url_for, flash, request, abort
 from werkzeug.urls import url_parse
-
 from app import db
 from app.auth import bp
 from app.auth.email import send_email_confirmation, send_password_reset_email
@@ -14,7 +13,7 @@ def register():
     """passes user through to correct registration form.
     """
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = RegisterAsForm()
     if form.validate_on_submit():
         if form.type_of_user.data == 'cohort leader':
@@ -31,7 +30,7 @@ def register():
 @bp.route('/register-as-candidate', methods=['GET', 'POST'])
 def register_as_candidate():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         candidate = Candidate()
@@ -48,7 +47,7 @@ def register_as_candidate():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.username.data).first()
@@ -61,7 +60,7 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
+            next_page = url_for('main.index')
         return redirect(next_page)
     return render_template('auth/login.html', title='Sign in', form=form)
 
@@ -69,13 +68,13 @@ def login():
 @bp.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 
 @bp.route('/reset-password-request', methods=['POST', 'GET'])
 def reset_password_request():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -90,10 +89,10 @@ def reset_password_request():
 @login_required
 def confirm_email(token):
     if current_user.confirmed:
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     elif current_user.confirm_user(token):
         flash("Thank you for confirming your account!")
     else:
         flash("The link is invalid or expired")
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 

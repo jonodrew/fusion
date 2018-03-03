@@ -78,3 +78,8 @@ def test_data() -> Tuple[List[Match], List[FastStreamer], List[Post]]:
                           dv=random.choice([True, False]), po=random.choice([True, False]))
     number = itertools.count().__next__
     return [Match(identifier=number(), fser_object=f, post_object=p) for f in l_fs for p in l_p], l_fs, l_p
+
+
+@pytest.fixture()
+def test_db():
+    pass

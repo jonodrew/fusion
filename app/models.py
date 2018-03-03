@@ -164,7 +164,7 @@ class Preferences(db.Model, Base):
     skill1 = db.Column(db.String(64))
     skill2 = db.Column(db.String(64))
     want_private_office = db.Column(db.Boolean())
-    url = db.Column(db.String(64), default='submit_preferences')
+    url = db.Column(db.String(64), default='main.submit_preferences')
 
     def has_form_to_complete(self, cid):
         form = Preferences.query.filter_by(self.candidate_id == cid).all()
