@@ -1,8 +1,11 @@
 version: '3'
 services:
   web:
-    build: .
-    command: flask run --host=0.0.0.0
+    build: ./app
+    restart: always
+    environment:
+      - FLASK_DEBUG=1
+    command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
       - .:/webapp
     ports:
@@ -11,7 +14,10 @@ services:
       - db
 
   db:
+    restart: always
     build:
       ./postgresql
-    container_name: match-post-local
-    restart: always
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

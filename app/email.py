@@ -29,7 +29,6 @@ def send_email(user: User, subject: str, from_email: str, substitutions: [Dict[A
     to_email = Email(user.email, user.first_name)
     m = Mail(from_email, subject, to_email, content)
     for key, value in substitutions.items():
-        print(key, value)
         m.personalizations[0].add_substitution(Substitution(key, value))
     if os.environ.get('ENV') == 'test':
         settings = MailSettings()
@@ -39,11 +38,7 @@ def send_email(user: User, subject: str, from_email: str, substitutions: [Dict[A
     try:
         response = sg.client.mail.send.post(request_body=m.get())
     except exceptions.BadRequestsError as e:
-        print(e.body)
         exit()
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
     return response
 
 
