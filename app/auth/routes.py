@@ -1,7 +1,6 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import redirect, render_template, url_for, flash, request, abort
 from werkzeug.urls import url_parse
-
 from app import db
 from app.auth import bp
 from app.auth.email import send_email_confirmation, send_password_reset_email
