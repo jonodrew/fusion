@@ -1,7 +1,7 @@
 from flask_login import current_user
 from app import app, db
 from flask import render_template, flash, redirect, url_for
-from app.forms import DepartmentalRoleForm, PreferencesForm
+from app.main.forms import DepartmentalRoleForm, PreferencesForm
 from app.models import User, Candidate, Preferences
 from flask_login import login_required
 import datetime as dt
@@ -28,7 +28,7 @@ def submit_role():
     form = DepartmentalRoleForm()
     if form.validate_on_submit():
         flash('Role {} submitted'.format(form.title))
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     return render_template('submit-role.html', title="Submit a role", form=form)
 
 
@@ -56,7 +56,7 @@ def submit_preferences():
         open_form.completed_date = dt.datetime.today()
         open_form.want_private_office = form.private_office.data
         db.session.commit()
-        return redirect(url_for('profile'))
+        return redirect(url_for('main.profile'))
     return render_template('preferences.html', title='Submit my preferences', form=form, form_available=bool(open_form))
 
 

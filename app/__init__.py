@@ -17,13 +17,16 @@ login.login_message = 'Please log in to access this page'
 bootstrap = Bootstrap(app)
 mail = SendGrid(app)
 
+"""these are blueprints - a way of making a Flask application more modular and re-usable"""
 from app.errors import bp as errors_bp
 app.register_blueprint(errors_bp)
 
 from app.auth import bp as auth_bp
 app.register_blueprint(auth_bp, url_prefix='/auth')
 
-from app import routes, models, errors
+from app.main import bp as main_bp
+app.register_blueprint(main_bp)
+
 
 # if not app.debug:
 #     file_handler = RotatingFileHandler('logs/match_my_post.log', maxBytes=10240,
@@ -34,3 +37,5 @@ from app import routes, models, errors
 #     app.logger.addHandler(file_handler)
 #     app.logger.setLevel(logging.INFO)
 #     app.logger.info('Match My Post startup')
+
+from app import models
