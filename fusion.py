@@ -1,7 +1,8 @@
-from app import app, db
+from app import create_app, db
 from app.models import User, Candidate
 import click
 
+app = create_app()
 
 @app.cli.command()
 @click.argument('name')

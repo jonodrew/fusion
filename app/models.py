@@ -1,7 +1,7 @@
 import datetime
-
+from flask import current_app
 from sqlalchemy.ext.declarative import declarative_base
-from app import db, login, app
+from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from time import time
