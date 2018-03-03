@@ -74,13 +74,13 @@ class ActivityManager(User):
     __mapper_args__ = {
         'polymorphic_identity': 'activity manager',
     }
-    id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
     organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))
 
 
 class Candidate(User):
     __tablename__ = 'candidates'
-    user_id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True, nullable=False)
     staff_number = db.Column(db.Integer, unique=True)
     specialism = db.Column(db.Integer, db.ForeignKey('specialisms.id'))
     line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
