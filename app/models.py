@@ -1,12 +1,14 @@
 import datetime
-from flask import current_app
 from sqlalchemy.ext.declarative import declarative_base
-from app import db, login
+from app import login, db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from time import time
 import jwt
 from . import db as database
+from flask import current_app
+
+
 
 
 @login.user_loader
@@ -44,7 +46,7 @@ class User(db.Model, UserMixin, Base):
     def generate_token(self, redirect: str, expiration=3600):
         return jwt.encode(
             {redirect: self.id, 'exp': time() + expiration},
-            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def set_confirmed(self) -> None:
         self.confirmed = True
@@ -52,7 +54,7 @@ class User(db.Model, UserMixin, Base):
     @staticmethod
     def validate_token(token: str, redirect: str):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])[redirect]
+            id = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])[redirect]
         except:
             return None
         return User.query.get(id)
@@ -80,13 +82,12 @@ class ActivityManager(User):
 
 class Candidate(User):
     __tablename__ = 'candidates'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False)
     staff_number = db.Column(db.Integer, unique=True)
     specialism = db.Column(db.Integer, db.ForeignKey('specialisms.id'))
-    line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+    line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     line_manager = db.relationship("User", foreign_keys=[line_manager_id])
-    user = db.relationship("User", foreign_keys=[user_id])
     preference_forms = db.relationship('Preferences', backref='owner', lazy='dynamic')
 
     __mapper_args__ = {
@@ -101,7 +102,7 @@ class Candidate(User):
 
 class CohortLeader(User):
     __tablename__ = 'cohort_leaders'
-    id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'cohort_leader',
@@ -121,6 +122,7 @@ class SchemeLeader(User):
         'polymorphic_identity': 'scheme_leader',
         'inherit_condition': (id == User.id)
     }
+
 
 class Organisation(db.Model, Base):
     __tablename__ = 'organisation'
