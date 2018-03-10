@@ -13,4 +13,8 @@ class Config(object):
 
 
 class Test(Config):
+    TESTDB = 'test_project.db'
+    # TESTDB_PATH = "/opt/project/data/{}".format(TESTDB)
+    TEST_DATABASE_URI = 'sqlite:///' + TESTDB
     FLASK_DEBUG = True
+    SQLALCHEMY_DATABASE_URI = TEST_DATABASE_URI
