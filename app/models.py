@@ -153,7 +153,7 @@ class Role(db.Model):
     organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))
     description = db.Column(db.Text)
     responsibilities = db.Column(db.Text)
-    # region = db.Column(db.Integer, db.ForeignKey('region.id'))
+    region = db.Column(db.Integer, db.ForeignKey('region.id'))
 
 
 class Preferences(db.Model, Base):

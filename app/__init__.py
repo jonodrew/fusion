@@ -36,6 +36,9 @@ def create_app(config_class=Config) -> Flask:
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from app.matching import bp as matching_bp
+    app.register_blueprint(matching_bp, url_prefix='/matching')
+
     return app
 
 
