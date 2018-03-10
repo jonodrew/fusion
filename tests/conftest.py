@@ -5,7 +5,7 @@ import os
 import itertools
 import pytest
 from config import Test
-from matching.classes import FastStreamer, Post, Match
+from app.matching.classes import FastStreamer, Post, Match
 from app import create_app, db as _db
 
 

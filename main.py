@@ -6,7 +6,7 @@ from operator import itemgetter
 from typing import List
 import munkres
 import numpy as np
-from matching.classes import Match
+from app.matching.classes import Match
 from tests.conftest import test_data
 
 
