@@ -1,5 +1,6 @@
 from typing import List, Union
 from app.matching.classes import Match, FastStreamer, Post
+from app.models import random_weighted_value
 
 
 def random_list(object_to_create: str, number: int) -> List[Union[Post, FastStreamer]]:
@@ -56,4 +57,4 @@ def test_random_weighted_value():
     f = 89
     weighted_dict = {10: 'True', 90: 'False'}
     assert random_weighted_value(r, weighted_dict)
-    assert not random_weighted_value(f, weighted_dict)
+    assert 'False' == random_weighted_value(f, weighted_dict)
