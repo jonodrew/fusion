@@ -94,19 +94,21 @@ class ActivityManager(User):
 
 class Candidate(User):
     __tablename__ = 'candidates'
-    # user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False, unique=True)
+    id = db.Column(None, db.ForeignKey('users.id'), primary_key=True)
     staff_number = db.Column(db.Integer, unique=True)
     line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    able_to_relocate = db.Column(db.Boolean, default=True)
 
     line_manager = db.relationship("User", foreign_keys=[line_manager_id])
-    preference_forms = db.relationship('Preferences', backref='owner', lazy='dynamic')
+    preference_forms = db.relationship('Preferences', backref='owner', lazy='dynamic', cascade='all, delete')
 
     @declared_attr
     def specialism(cls):
         return User.__table__.c.get('specialism', db.Column(db.ForeignKey('specialisms.id')))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'candidate'
+        'polymorphic_identity': 'candidate',
+        'inherit_condition': id == User.id
     }
 
     def get_open_forms(self):
@@ -170,6 +172,7 @@ class Role(db.Model):
     description = db.Column(db.Text)
     responsibilities = db.Column(db.Text)
     region = db.Column(db.Integer, db.ForeignKey('regions.id'))
+    private_office = db.Column(db.Boolean, default=False)
 
 
 class Preferences(db.Model, Base):
