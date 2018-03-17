@@ -14,9 +14,11 @@ class Config(object):
 
 
 class Test(Config):
-    postgresql = testing.postgresql.Postgresql()
-    TESTDB = 'test_project.db'
-    # TESTDB_PATH = "/opt/project/data/{}".format(TESTDB)
-    TEST_DATABASE_URI = postgresql.url()
+    try:
+        postgresql = testing.postgresql.Postgresql()
+        TEST_DATABASE_URI = postgresql.url()
+    except RuntimeError:
+        TESTDB = 'test_project.db'
+        TEST_DATABASE_URI = 'sqlite///' + TESTDB
     FLASK_DEBUG = True
     SQLALCHEMY_DATABASE_URI = TEST_DATABASE_URI

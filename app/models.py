@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from time import time
 import jwt
 from . import db as database
-from flask import current_app
+from flask import current_app, json
 
 
 @login.user_loader
@@ -24,9 +24,9 @@ def random_between_one_hundred():
     return random.randint(0, 100)
 
 
-def random_weighted_value(random_integer, weighted_values_dict: Dict[float, str]) -> str:
+def random_weighted_value(random_integer, weighted_values_dict: Dict[int, int]) -> int:
     for value in weighted_values_dict:
-        if random_integer < value:
+        if random_integer <= value:
             return weighted_values_dict[value]
 
 
@@ -74,9 +74,7 @@ class User(db.Model, UserMixin, Base):
         u = User.validate_token(token, 'confirm_email')
         if u.id == self.id:
             self.set_confirmed()
-            database.session.add(self)
-            database.session.commit()
-            return True
+            db.session.commit()
         else:
             print('Error')
         return None
@@ -181,15 +179,27 @@ class Preferences(db.Model, Base):
     close_date = db.Column(db.DateTime())
     completed_date = db.Column(db.DateTime())
     completed = db.Column(db.Boolean(), default=False)
-    skills = db.Column(db.JSON())
+    skills = db.Column(db.JSON())  # using JSON for now because I don't know how many skills will be in table
     want_private_office = db.Column(db.Boolean())
     location = db.Column(db.String(64))
-    department = db.Column(db.JSON())
+    organisation = db.Column(db.JSON())
     url = db.Column(db.String(64), default='main.submit_preferences')
 
     def has_form_to_complete(self, cid):
         form = Preferences.query.filter(self.candidate_id == cid, self.completed == False).all()
         return form
+
+    @staticmethod
+    def create_random(candidate_id: int, weightings: Dict[str, Dict[int, int]]):
+        def random_skills():
+            r = random_weighted_value(random_between_one_hundred(), weightings['skills'])
+            p.skills = json.dumps({1: r})
+        p = Preferences(candidate_id=candidate_id)
+        random_skills(1)
+        return p
+
+    def __repr__(self):
+        return 'Belongs to Candidate {}'.format(self.owner)
 
 
 class Specialism(db.Model, Base):
@@ -202,6 +212,19 @@ class Region(db.Model):
     __tablename__ = 'regions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+
+    def __repr__(self):
+        return 'Region {}'.format(self.name)
+
+
+class Skill(db.Model):
+    __tablename__ = 'skills'
+    id = db.Column(db.Integer(), primary_key=True, index=True)
+    specialism = db.Column(db.ForeignKey('specialisms.id'), nullable=True)
+    description = db.Column(db.String(128))
+
+    def __repr__(self):
+        return 'Skill {}'.format(self.description)
 
 
 # class MatchTable(db.Model):

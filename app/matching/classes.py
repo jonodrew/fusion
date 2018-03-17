@@ -202,24 +202,3 @@ class Match:
 
     def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
         return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
-
-
-class Preferences:
-    def __init__(self, anchors: Dict[int, str]=None, skills=None, undertake_dv=False, want_po=False, locations=None,
-                 secondment=False, departments: Set[str]=None):
-        if anchors is None:
-            self.anchors = {1: "", 2: ""}
-        else:
-            self.anchors = anchors
-        if departments is None:
-            self.departments = {}
-        else:
-            self.departments = departments
-        self.skills = skills
-        self.will_undertake_dv = undertake_dv
-        self.wants_private_office = want_po
-        self.locations = locations
-        self.secondment = secondment
-
-    def from_model(self, preferences_model):
-        return Preferences(skills=json.loads(preferences_model.skills))

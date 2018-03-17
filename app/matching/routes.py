@@ -21,8 +21,8 @@ def generate():
 
 @bp.route('/data')
 def data():
-    candidates = [Candidate(first_name='Stephen', last_name='Strange', specialism='Magic'),
-                  Candidate(first_name='Sue', last_name='Storm', specialism='Security')]
+    requested_data = session['data']
+    candidates = [Candidate() for i in range(0, requested_data)]
     roles = [Role(description='Gladiatorial combat', organisation='Fantastic Four'),
              Role(description='Cat herding', organisation='Primary School')]
     return render_template('matching/data.html', candidates=candidates, roles=roles)
