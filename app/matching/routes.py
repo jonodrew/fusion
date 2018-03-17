@@ -1,3 +1,5 @@
+import random
+
 from flask import render_template, redirect, url_for, session
 
 from app.matching import bp
@@ -22,7 +24,8 @@ def generate():
 @bp.route('/data')
 def data():
     requested_data = session['data']
-    candidates = [Candidate() for i in range(0, requested_data)]
+    candidate_ids = random.sample(range(247), requested_data)
+    candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids))
     roles = [Role(description='Gladiatorial combat', organisation='Fantastic Four'),
              Role(description='Cat herding', organisation='Primary School')]
     return render_template('matching/data.html', candidates=candidates, roles=roles)
