@@ -1,5 +1,7 @@
 from typing import List, Dict, Any, Set, Union
 
+from flask import json
+
 
 class FastStreamer:
     """This class contains the methods and attributes of the FastStreamer object, which has a past history and future
@@ -218,3 +220,6 @@ class Preferences:
         self.wants_private_office = want_po
         self.locations = locations
         self.secondment = secondment
+
+    def from_model(self, preferences_model):
+        return Preferences(skills=json.loads(preferences_model.skills))

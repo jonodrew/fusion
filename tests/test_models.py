@@ -1,4 +1,6 @@
-from app.models import User, Candidate
+from flask import json
+
+from app.models import User, Candidate, Preferences, random_weighted_value
 
 
 def test_password_hash():
@@ -30,6 +32,9 @@ def test_delete_user_from_db(session):
     session.delete(c)
     session.commit()
     assert 0 == Candidate.query.count()
+
+
+
 
 
 

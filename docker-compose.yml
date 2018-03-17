@@ -8,9 +8,9 @@ services:
       - ENV=test
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
-      - ./app:/home/match-post-service/app
+      - .:/home/match-post-service/
     ports:
-      - "5000:5000"
+      - "3000:3000"
     depends_on:
       - db
 
