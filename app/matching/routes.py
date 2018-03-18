@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, session
 
 from app.matching import bp
 from app.matching.forms import HowManyRandom
-from app.models import Candidate, Role
+from app.models import Candidate, Role, Specialism
 
 
 @bp.route('/trial', methods=['GET', 'POST'])
@@ -23,9 +23,14 @@ def generate():
 
 @bp.route('/data')
 def data():
-    requested_data = session['data']
-    candidate_ids = random.sample(range(247), requested_data)
-    candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids))
+    try:
+        requested_data = session['data']
+    except KeyError:
+        requested_data = 10
+    candidate_ids = random.sample(range(332, 582), requested_data)
+    print(candidate_ids)
+    candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
+    print(candidates[0].specialism)
     roles = [Role(description='Gladiatorial combat', organisation='Fantastic Four'),
              Role(description='Cat herding', organisation='Primary School')]
-    return render_template('matching/data.html', candidates=candidates, roles=roles)
+    return render_template('matching/data.html', candidates=candidates, roles=roles, data=requested_data)

@@ -100,10 +100,11 @@ class Candidate(User):
     able_to_relocate = db.Column(db.Boolean, default=True)
 
     line_manager = db.relationship("User", foreign_keys=[line_manager_id])
-    preference_forms = db.relationship('Preferences', backref='owner', lazy='dynamic', cascade='all, delete')
+    preferences = db.relationship('Preferences', backref='owner', lazy='dynamic', cascade='all, delete')
+    specialism = db.relationship('Specialism', lazy='select', backref='specialist')
 
     @declared_attr
-    def specialism(cls):
+    def specialism_id(cls):
         return User.__table__.c.get('specialism', db.Column(db.ForeignKey('specialisms.id')))
 
     __mapper_args__ = {
@@ -113,7 +114,7 @@ class Candidate(User):
 
     def get_open_forms(self):
         return self.preference_forms.filter(Preferences.close_date >= datetime.datetime.today(),
-                                                  Preferences.completed == False).all()
+                                            Preferences.completed == False).all()
 
 
 class CohortLeader(User):
@@ -130,10 +131,11 @@ class CohortLeader(User):
 
 class SchemeLeader(User):
     __tablename__ = 'scheme_leaders'
+
     # id = db.Column(None, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
 
     @declared_attr
-    def specialism(cls):
+    def specialism_id(cls):
         return User.__table__.c.get('specialism', db.Column(db.ForeignKey('specialisms.id')))
 
     __mapper_args__ = {
@@ -192,14 +194,16 @@ class Preferences(db.Model, Base):
         form = Preferences.query.filter(self.candidate_id == cid, self.completed == False).all()
         return form
 
-    @staticmethod
-    def create_random(candidate_id: int, weightings: Dict[str, Dict[int, int]]):
-        def random_skills():
-            r = random_weighted_value(random_between_one_hundred(), weightings['skills'])
-            p.skills = json.dumps({1: r})
-        p = Preferences(candidate_id=candidate_id)
-        random_skills(1)
-        return p
+    def wanted_skills(self):
+        """This function takes the JSON formatted text from the column for this preference form and compares it with
+        the skills in the Skill table. It returns the name of the matching skill. This is for formatting and output
+        purposes - analysing equality or comparisons is done with integers for speed."""
+        skills_dict = json.loads(self.skills)
+        specialism_id = self.owner.specialism.id
+        skill_id_and_name = dict(
+            Skill.query.with_entities(Skill.id, Skill.description).filter(Skill.specialism == specialism_id). \
+            all())
+        return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
     def __repr__(self):
         return 'Belongs to Candidate {}'.format(self.owner)
@@ -229,7 +233,6 @@ class Skill(db.Model):
     def __repr__(self):
         return 'Skill {}'.format(self.description)
 
-
 # class MatchTable(db.Model):
 #     __tablename__ = 'matches'
 #     id = db.Column(db.Integer, primary_key=True)
@@ -238,5 +241,3 @@ class Skill(db.Model):
 #     match_score = db.Column(db.Integer)
 #     skill_score = db.Column(db.Integer)
 #     location_score = db.Column(db.Integer)
-
-
