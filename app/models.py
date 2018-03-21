@@ -98,10 +98,12 @@ class Candidate(User):
     staff_number = db.Column(db.Integer, unique=True)
     line_manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     able_to_relocate = db.Column(db.Boolean, default=True)
+    region_id = db.Column(db.ForeignKey('regions.id'))
 
     line_manager = db.relationship("User", foreign_keys=[line_manager_id])
     preferences = db.relationship('Preferences', backref='owner', lazy='dynamic', cascade='all, delete')
     specialism = db.relationship('Specialism', lazy='select', backref='specialist')
+    region = db.relationship('Region', lazy='select')
 
     @declared_attr
     def specialism_id(cls):

@@ -1,6 +1,7 @@
 Name: {{ candidate.first_name }} {{ candidate.last_name }}<br>
 Specialism: {{ candidate.specialism.name }}<br>
-Candidate is {% if candidate.able_to_relocate %} able {% else %}unable {% endif %}to relocate<br>
+Candidate is based in {{ candidate.region.name }}and is{% if candidate.able_to_relocate %} able {% else %}unable
+{% endif %}to relocate<br>
 Candidate would {% if candidate.preferences.first().want_private_office != true %}not {% endif %}
 like a private office post<br>
 Candidate would like the following skills in their next post:

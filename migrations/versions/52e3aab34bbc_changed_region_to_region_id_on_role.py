@@ -22,8 +22,8 @@ def upgrade():
     op.drop_constraint('roles_region_fkey', 'roles', type_='foreignkey')
     op.alter_column(table_name='roles', column_name='organisation', new_column_name='organisation_id')
     op.alter_column(table_name='roles', column_name='region', new_column_name='region_id')
-    op.create_foreign_key(None, 'roles', 'regions', ['region_id'], ['id'])
-    op.create_foreign_key(None, 'roles', 'organisation', ['organisation_id'], ['id'])
+    op.create_foreign_key('roles_organisation_id_fkey', 'roles', 'regions', ['region_id'], ['id'])
+    op.create_foreign_key('roles_region_id_fkey', 'roles', 'organisation', ['organisation_id'], ['id'])
     # ### end Alembic commands ###
 
 
