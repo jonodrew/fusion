@@ -1,2 +1,13 @@
 Description: {{ role.description }}<br>
-Organisation: {{ role.organisation }}
+Organisation: {{ role.organisation.name }}<br>
+Specialism: {{ role.specialism.name }}<br>
+Location: {{ role.region.name }}<br>
+This role is {% if role.private_office == false %}not{% endif %} a private office role<br>
+This role offers the following skills:
+<ul>
+    {% for skill in role.wanted_skills() %}
+        <li>{{ skill }}</li>
+    {% endfor %}
+
+</ul>
+<hr>

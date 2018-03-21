@@ -17,10 +17,9 @@
         <h2>
             Roles
         </h2>
-        <p>Roles haven't been built yet</p>
-{#            {% for role in roles %}#}
-{#                <p>{% include '_role.html' %}</p>#}
-{#            {% endfor %}#}
-{#        </div>#}
-{#    </div>#}
+            {% for role in roles %}
+                <p>{% include '_role.html' %}</p>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

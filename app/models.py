@@ -179,13 +179,15 @@ class Role(db.Model):
     skills = db.Column(db.JSON())
 
     specialism = db.relationship('Specialism', lazy='select', backref='specialist_roles')
+    organisation = db.relationship('Organisation', lazy='select')
+    region = db.relationship('Region', lazy='select')
 
     def wanted_skills(self):
         """This function takes the JSON formatted text from the column for this preference form and compares it with
         the skills in the Skill table. It returns the name of the matching skill. This is for formatting and output
         purposes - analysing equality or comparisons is done with integers for speed."""
         skills_dict = json.loads(self.skills)
-        specialism_id = self.owner.specialism.id
+        specialism_id = self.specialism.id
         skill_id_and_name = dict(
             Skill.query.with_entities(Skill.id, Skill.description).filter(Skill.specialism == specialism_id). \
             all())

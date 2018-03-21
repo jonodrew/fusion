@@ -28,6 +28,10 @@ def data():
     except KeyError:
         requested_data = 10
     candidate_ids = Preferences.query.with_entities(Preferences.candidate_id).all()
+    roles = Role.query.all()
+    role_ids = [role.id for role in roles]
+    random_ids = random.sample(role_ids, requested_data)
+    roles = [role for role in roles if role.id in random_ids]
     candidate_ids = random.sample([c[0] for c in candidate_ids], requested_data)
     candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
-    return render_template('matching/data.html', candidates=candidates, data=requested_data)
+    return render_template('matching/data.html', candidates=candidates, data=requested_data, roles=roles)
