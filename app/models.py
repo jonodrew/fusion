@@ -233,11 +233,13 @@ class Skill(db.Model):
     def __repr__(self):
         return 'Skill {}'.format(self.description)
 
-# class MatchTable(db.Model):
-#     __tablename__ = 'matches'
-#     id = db.Column(db.Integer, primary_key=True)
-#     candidate_id = db.Column(db.ForeignKey('candidates.user_id'))
-#     role_id = db.Column(db.ForeignKey('roles.id'))
-#     match_score = db.Column(db.Integer)
+
+class MatchTable(db.Model):
+    __tablename__ = 'matches'
+    id = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.ForeignKey('candidates.id'))
+    role_id = db.Column(db.ForeignKey('roles.id'))
+    scores = db.Column(db.JSON())
+    match_score = db.Column(db.Integer)
 #     skill_score = db.Column(db.Integer)
 #     location_score = db.Column(db.Integer)
