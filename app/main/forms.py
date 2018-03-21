@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, RadioField
-from wtforms.validators import DataRequired, EqualTo, ValidationError, Email
-
-from app.models import User
+from wtforms import StringField, BooleanField, SubmitField, SelectField, TextAreaField
+from wtforms.validators import DataRequired
 
 departments = ['HO', 'DWP', 'HMRC', 'DH', 'CO', 'GDS', 'MOD', 'DDCMS', 'DCLG', 'DEFRA', 'MOJ', 'DFT', 'DFE', 'DFID']
 skills = ['Software Engineering', 'User Research', 'Strategy & Policy', 'Product Design', 'Content & Analysis',

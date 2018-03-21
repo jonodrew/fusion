@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+    <div class="col-md-8">
+<h1>
+    This series of pages will let you try out the automated matching process.
+</h1>
+    <br>
+<a class="btn btn-primary" href={{ url_for('matching.generate') }} role="button">Touch here to get started</a>
+     </div>
+{% endblock %}

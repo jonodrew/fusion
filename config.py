@@ -1,5 +1,6 @@
 import os
 import secrets
+import testing.postgresql
 
 basedir = os.path.abspath((os.path.dirname(__name__)))
 
@@ -13,8 +14,11 @@ class Config(object):
 
 
 class Test(Config):
-    TESTDB = 'test_project.db'
-    # TESTDB_PATH = "/opt/project/data/{}".format(TESTDB)
-    TEST_DATABASE_URI = 'sqlite:///' + TESTDB
+    try:
+        postgresql = testing.postgresql.Postgresql()
+        TEST_DATABASE_URI = postgresql.url()
+    except RuntimeError:
+        TESTDB = 'test_project.db'
+        TEST_DATABASE_URI = 'sqlite///' + TESTDB
     FLASK_DEBUG = True
     SQLALCHEMY_DATABASE_URI = TEST_DATABASE_URI

@@ -1,0 +1,11 @@
+Name: {{ candidate.first_name }} {{ candidate.last_name }}<br>
+Specialism: {{ candidate.specialism.name }}<br>
+Candidate is {% if candidate.able_to_relocate %} able {% else %}unable {% endif %}to relocate<br>
+Candidate would like the following skills in their next post:
+<ul>
+    {% for skill in candidate.preferences.first().wanted_skills() %}
+        <li>{{ skill }}</li>
+    {% endfor %}
+    
+</ul>
+<hr>

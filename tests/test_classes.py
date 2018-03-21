@@ -49,3 +49,5 @@ class TestMatchClass:
         assert m.suitable_location_check()
         model_post.location = 'Midlands'
         assert m.suitable_location_check() is False
+
+
