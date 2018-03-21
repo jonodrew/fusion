@@ -1,5 +1,6 @@
 from app import create_app, db, cli
-from app.models import User, Candidate, CohortLeader, SchemeLeader
+from app.matching.classes import Match
+from app.models import User, Candidate, CohortLeader, SchemeLeader, Role
 import click
 
 app = create_app()
@@ -15,6 +16,7 @@ def print_name(name):
 
 @app.shell_context_processor
 def make_shell_context():
-    return {'db': db, 'User': User, 'Candidate': Candidate, 'CohortLeader': CohortLeader, 'SchemeLeader': SchemeLeader}
+    return {'db': db, 'Candidate': Candidate, 'CohortLeader': CohortLeader, 'SchemeLeader': SchemeLeader, 'Role': Role,
+            'Match': Match}
 
 

@@ -170,11 +170,26 @@ class Department(Organisation):
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    organisation = db.Column(db.Integer, db.ForeignKey('organisation.id'))
+    organisation_id = db.Column(db.Integer, db.ForeignKey('organisation.id'))
     description = db.Column(db.Text)
+    specialism_id = db.Column(db.ForeignKey('specialisms.id'))
     responsibilities = db.Column(db.Text)
-    region = db.Column(db.Integer, db.ForeignKey('regions.id'))
+    region_id = db.Column(db.Integer, db.ForeignKey('regions.id'))
     private_office = db.Column(db.Boolean, default=False)
+    skills = db.Column(db.JSON())
+
+    specialism = db.relationship('Specialism', lazy='select', backref='specialist_roles')
+
+    def wanted_skills(self):
+        """This function takes the JSON formatted text from the column for this preference form and compares it with
+        the skills in the Skill table. It returns the name of the matching skill. This is for formatting and output
+        purposes - analysing equality or comparisons is done with integers for speed."""
+        skills_dict = json.loads(self.skills)
+        specialism_id = self.owner.specialism.id
+        skill_id_and_name = dict(
+            Skill.query.with_entities(Skill.id, Skill.description).filter(Skill.specialism == specialism_id). \
+            all())
+        return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
 
 class Preferences(db.Model, Base):
