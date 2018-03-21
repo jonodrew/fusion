@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
 
 {% block app_content %}
-    <h3>You asked for {{ data }} pieces of data, but I haven't built a tool to create random data yet.
-        <br>
-        <br>
-    Calculating the best match for that many candidates will require {{ data ** 4 }} steps.</h3>
-{#<h1>#}
-{#    Here are your candidates and roles#}
-{#</h1>#}
+<h1>
+    Here are your candidates and roles
+</h1>
+    <h3>Calculating the best match for {{ data }} candidates will require {{ data ** 4 }} steps.</h3>
     <div class="col-md-6">
         <h2>
             Candidates
@@ -20,9 +17,10 @@
         <h2>
             Roles
         </h2>
-            {% for role in roles %}
-                <p>{% include '_role.html' %}</p>
-            {% endfor %}
+        <p>Roles haven't been built yet</p>
+{#            {% for role in roles %}#}
+{#                <p>{% include '_role.html' %}</p>#}
+{#            {% endfor %}#}
 {#        </div>#}
 {#    </div>#}
 {% endblock %}
