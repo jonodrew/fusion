@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, session
 
 from app.matching import bp
 from app.matching.forms import HowManyRandom
-from app.models import Candidate, Role, Specialism, Preferences
+from app.models import Candidate, Role, Specialism, Preferences, MatchTable
 
 
 @bp.route('/trial', methods=['GET', 'POST'])
@@ -45,7 +45,12 @@ def match():
         candidate_ids = session['candidates']
         role_ids = session['roles']
     except KeyError:
-        return redirect(url_for('matching.trial'))
+        # return redirect(url_for('matching.trial'))
+        cands = Candidate.query.all()
+        roles = Role.query.all()
+        candidate_ids = random.sample([c.id for c in cands], 10)
+        role_ids = random.sample([r.id for r in roles], 10)
     candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
     roles = Role.query.filter(Role.id.in_(role_ids)).all()
-    return candidates[0].first_name
+    m = MatchTable(role_object=roles[0], candidate_object=candidates[0])
+    return str(m.skills_match)

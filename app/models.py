@@ -213,7 +213,7 @@ class Preferences(db.Model, Base):
         form = Preferences.query.filter(self.candidate_id == cid, self.completed == False).all()
         return form
 
-    def wanted_skills(self):
+    def wanted_skills(self) -> List[str]:
         """This function takes the JSON formatted text from the column for this preference form and compares it with
         the skills in the Skill table. It returns the name of the matching skill. This is for formatting and output
         purposes - analysing equality or comparisons is done with integers for speed."""
@@ -270,7 +270,7 @@ class MatchTable(db.Model):
     scores = db.Column(db.JSON())
     match_score = db.Column(db.Integer)
 
-    weights_dict = {'anchor': 10, 'location': 2, 'skills': 5, 'department': 2}
+    weights_dict = {'location': 5, 'skills': 10, 'department': 2, 'private office': 3}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -308,7 +308,15 @@ class MatchTable(db.Model):
 
     @staticmethod
     def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
-        return value_to_check in [v for k, v in dict_to_check.items()]
+        return value_to_check in dict_to_check.values()
+
+    @staticmethod
+    def count_overlap_of_dicts(dict_a: Dict[Any, Any], dict_b: Dict[Any, Any]) -> int:
+        a = [a for a in dict_a.values()]
+        b = [b for b in dict_b.values()]
+        set_a = set(a)
+        set_b = set(b)
+        return len(set_a.intersection(set_b))
 
     @staticmethod
     def convert_clearances(clearance: str) -> int:
@@ -339,37 +347,43 @@ class MatchTable(db.Model):
         @return: bool
        """
         if not self.candidate.able_to_relocate:  # if the candidate cannot relocate
-            return self.role.region_id == self.candidate.region_id  #
+            output = self.role.region_id == self.candidate.region_id
             """return True if the role's region is the same as their current region"""
-        return (not self.candidate.able_to_relocate) or self.check_x_in_y_list(
-            self.candidate.preferences.first().location, self.role.location)
+        else:
+            wanted_regions = json.loads(self.candidate.preferences.first().locations)
+            output = self.check_x_in_y_dict(wanted_regions, self.role.region_id)
+        return output
 
     def __init__(self, role_object: Role = None, candidate_object: Candidate = None) -> None:
         self.role = role_object
         self.candidate = candidate_object
         self.candidate_id = self.candidate.id
         self.role_id = self.role.id
-        self.po_match = self.boolean_implication(self.role.is_private_office,
-                                                 self.candidate.preferences.first().wants_private_office)
+        self.po_match = self.boolean_implication(self.role.private_office,
+                                                 self.candidate.preferences.first().want_private_office)
         # self.reserved_match = self.boolean_implication(self.post.reserved, self.fast_streamer.national)
         # self.clearance_match = self.compare_clearance()
-        self.suitable_location = self.suitable_location_check()
-        if not (self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
-            self.total = 0
-            self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
-            # this approach massively improves speed when generating the matrix, but also means that the match cannot
-            # later be examined for how good or bad it was
-        else:
-            self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
-            self.location_match = self.check_x_in_y_list(self.fast_streamer.preferences.locations, self.post.location)
-            self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
-                                                                          self.fast_streamer.preferences.skills)
-            self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
-                                                                              self.fast_streamer.preferences.departments)
-            self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
-                                 'skills': self.skills_match, 'department': self.department_match}
-            self.weighted_scores = self.apply_weighting(weighting_dict=MatchTable.weights_dict)
-            self.total = self.create_match_score(self.weighted_scores)
+        self.location_match = self.suitable_location_check()
+        self.skills_match = self.count_overlap_of_dicts(json.loads(self.role.skills),
+                                                        json.loads(self.candidate.preferences.first().skills))
+        self.match_scores = {'location': self.location_match, 'private office': self.po_match,
+                             'skills': self.skills_match}
+        # if not (self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
+        #     self.total = 0
+        #     self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
+        #     # this approach massively improves speed when generating the matrix, but also means that the match cannot
+        #     # later be examined for how good or bad it was
+        # else:
+        #     self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
+        #     self.location_match = self.check_x_in_y_list(self.fast_streamer.preferences.locations, self.post.location)
+        #     self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
+        #                                                                   self.fast_streamer.preferences.skills)
+        #     self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
+        #                                                                       self.fast_streamer.preferences.departments)
+        #     self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
+        #                          'skills': self.skills_match, 'department': self.department_match}
+        #     self.weighted_scores = self.apply_weighting(weighting_dict=MatchTable.weights_dict)
+        #     self.total = self.create_match_score(self.weighted_scores)
 
     def compare_clearance(self) -> bool:
         """
@@ -387,9 +401,6 @@ class MatchTable(db.Model):
         else:
             r = post_c <= fs_c
         return r
-
-    def compare_private_office(self) -> bool:
-        return (not self.post.is_private_office) or self.fast_streamer.preferences.wants_private_office
 
     def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
         return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
