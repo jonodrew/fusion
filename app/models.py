@@ -205,7 +205,7 @@ class Preferences(db.Model, Base):
     completed = db.Column(db.Boolean(), default=False)
     skills = db.Column(db.JSON())  # using JSON for now because I don't know how many skills will be in table
     want_private_office = db.Column(db.Boolean())
-    location = db.Column(db.String(64))
+    locations = db.Column(db.JSON())
     organisation = db.Column(db.JSON())
     url = db.Column(db.String(64), default='main.submit_preferences')
 
