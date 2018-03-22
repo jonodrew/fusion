@@ -224,6 +224,13 @@ class Preferences(db.Model, Base):
             all())
         return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
+    def wanted_organisations(self):
+        orgs_dict = json.loads(self.organisation)
+        organisation_id_and_name = dict(
+            Organisation.query.with_entities(Organisation.id, Organisation.name).all()
+        )
+        return [organisation_id_and_name[org] for preference, org in orgs_dict.items()]
+
     def __repr__(self):
         return 'Belongs to Candidate {}'.format(self.owner)
 
