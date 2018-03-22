@@ -192,7 +192,7 @@ class Role(db.Model):
         specialism_id = self.specialism.id
         skill_id_and_name = dict(
             Skill.query.with_entities(Skill.id, Skill.description).filter(Skill.specialism == specialism_id). \
-            all())
+                all())
         return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
 
@@ -221,7 +221,7 @@ class Preferences(db.Model, Base):
         specialism_id = self.owner.specialism.id
         skill_id_and_name = dict(
             Skill.query.with_entities(Skill.id, Skill.description).filter(Skill.specialism == specialism_id). \
-            all())
+                all())
         return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
     def wanted_organisations(self):
@@ -269,5 +269,129 @@ class MatchTable(db.Model):
     role_id = db.Column(db.ForeignKey('roles.id'))
     scores = db.Column(db.JSON())
     match_score = db.Column(db.Integer)
+
+    weights_dict = {'anchor': 10, 'location': 2, 'skills': 5, 'department': 2}
+
+    @staticmethod
+    def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
+        """
+        Compare two attributes. If they're equal, return True, otherwise return False.
+        Args:
+            p_attribute (str): some attribute of the post
+            fs_attribute (str): some attribute of the FastStreamer
+
+        Returns:
+            int: the value of the match of the two attributes
+
+        """
+        return p_attribute == fs_attribute
+
+    @staticmethod
+    def create_match_score(scores: Dict[str, int]) -> int:
+        """
+        This method returns the sum of all the scores, passed as a dictionary
+        Args:
+            scores:
+
+        Returns:
+
+        """
+        return sum([scores[k] for k in scores])
+
+    @staticmethod
+    def check_x_in_y_list(list_to_check: List[Any], value_to_check) -> bool:
+        try:
+            r = value_to_check in set(list_to_check)
+        except TypeError:
+            r = True
+        return r
+
+    @staticmethod
+    def check_x_in_y_dict(dict_to_check: Dict[Any, Any], value_to_check) -> bool:
+        return value_to_check in [v for k, v in dict_to_check.items()]
+
+    @staticmethod
+    def convert_clearances(clearance: str) -> int:
+        """
+        This function converts a clearance level as a string to an int for comparison
+        Args:
+            clearance: string representing clearance level
+
+        Returns:
+            int
+
+        """
+        c = {'SC': 3, 'DV': 4, 'CTC': 2, 'BPSS': 1}
+        return c[clearance]
+
+    @staticmethod
+    def boolean_implication(a: bool, b: bool) -> bool:
+        return (not a) or b
+
+    @staticmethod
+    def check_any_item_from_list_a_in_list_b(a: Union[List[str], Set], b: List) -> bool:
+        return bool(set(a).intersection(set(b)))
+
+    def suitable_location_check(self) -> bool:
+        """
+        Checks if FS has location restriction: if so, returns True if it's the location the FS wants, if not, returns
+        False
+        @return: bool
+       """
+        if not self.candidate.able_to_relocate:  # if the candidate cannot relocate
+            return self.role.region_id == self.candidate.region_id  #
+            """return True if the role's region is the same as their current region"""
+        return (not self.candidate.able_to_relocate) or self.check_x_in_y_list(
+            self.candidate.preferences.first().location, self.role.location)
+
+    def __init__(self, role_object: Role = None, candidate_object: Candidate = None) -> None:
+        self.role = role_object
+        self.candidate = candidate_object
+        self.candidate_id = self.candidate.id
+        self.role_id = self.role.id
+        self.po_match = self.boolean_implication(self.role.is_private_office,
+                                                 self.candidate.preferences.first().wants_private_office)
+        # self.reserved_match = self.boolean_implication(self.post.reserved, self.fast_streamer.national)
+        # self.clearance_match = self.compare_clearance()
+        self.suitable_location = self.suitable_location_check()
+        if not (self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
+            self.total = 0
+            self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
+            # this approach massively improves speed when generating the matrix, but also means that the match cannot
+            # later be examined for how good or bad it was
+        else:
+            self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
+            self.location_match = self.check_x_in_y_list(self.fast_streamer.preferences.locations, self.post.location)
+            self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
+                                                                          self.fast_streamer.preferences.skills)
+            self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
+                                                                              self.fast_streamer.preferences.departments)
+            self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
+                                 'skills': self.skills_match, 'department': self.department_match}
+            self.weighted_scores = self.apply_weighting(weighting_dict=MatchTable.weights_dict)
+            self.total = self.create_match_score(self.weighted_scores)
+
+    def compare_clearance(self) -> bool:
+        """
+        Compares FastStreamer's clearance and Post clearance. Returns True if FastStreamer clearance is greater than
+        or equal to Post clearance returns True, else returns False
+
+        Returns:
+            bool
+
+        """
+        post_c = self.convert_clearances(self.post.clearance)
+        fs_c = self.convert_clearances(self.fast_streamer.clearance)
+        if self.post.clearance == 'DV' and self.fast_streamer.preferences.will_undertake_dv is True:
+            r = True
+        else:
+            r = post_c <= fs_c
+        return r
+
+    def compare_private_office(self) -> bool:
+        return (not self.post.is_private_office) or self.fast_streamer.preferences.wants_private_office
+
+    def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
+        return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
 #     skill_score = db.Column(db.Integer)
 #     location_score = db.Column(db.Integer)
