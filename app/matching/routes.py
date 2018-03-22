@@ -1,5 +1,8 @@
 import random
+import copy
+import sys
 
+import munkres
 from flask import render_template, redirect, url_for, session
 
 from app.matching import bp
@@ -52,5 +55,20 @@ def match():
         role_ids = random.sample([r.id for r in roles], 10)
     candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
     roles = Role.query.filter(Role.id.in_(role_ids)).all()
-    m = MatchTable(role_object=roles[0], candidate_object=candidates[0])
-    return str(m.skills_match)
+    matches = [MatchTable(r, c) for r in roles for c in candidates]
+    sorted_matches = sorted(matches, key=lambda m: m.role_id)
+    m = munkres.Munkres()
+    table_of_objects = [matches[i:i + len(roles)] for i in range(0, len(matches), len(roles))]
+    m.pad_matrix(table_of_objects, len(roles) - len(candidates))
+    table_of_totals = [[sys.maxsize - m.total for m in row] for row in table_of_objects]
+    best_match_indices = m.compute(table_of_totals)
+    best_matches = [table_of_objects[row][column] for row, column in best_match_indices]
+    aggregate = sum([m.total for m in best_matches])
+
+    strings0 = ["Role: {}<br>Candidate: {}<br>Score: {}<br><hr>".format(m.role_id, m.candidate_id, m.total) for m in
+               sorted_matches]
+    strings = ["Matched:<br>Role id: {}<br>Candidate id: {}<br>Score: {}<br><hr>".
+                   format(i.role_id, i.candidate_id, i.total) for i in best_matches]
+    output0 = '<br>'.join(strings0)
+    output1 = ''.join(strings)
+    return ''.join([output0, output1])

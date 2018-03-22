@@ -204,7 +204,7 @@ class Preferences(db.Model, Base):
     completed_date = db.Column(db.DateTime())
     completed = db.Column(db.Boolean(), default=False)
     skills = db.Column(db.JSON())  # using JSON for now because I don't know how many skills will be in table
-    want_private_office = db.Column(db.Boolean())
+    want_private_office = db.Column(db.Boolean(), default=False)
     locations = db.Column(db.JSON())
     organisation = db.Column(db.JSON())
     url = db.Column(db.String(64), default='main.submit_preferences')
@@ -270,7 +270,7 @@ class MatchTable(db.Model):
     scores = db.Column(db.JSON())
     match_score = db.Column(db.Integer)
 
-    weights_dict = {'location': 5, 'skills': 10, 'department': 2, 'private office': 3}
+    weights_dict = {'location': 15, 'skills': 20, 'private office': 10, 'organisation': 15}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -349,12 +349,18 @@ class MatchTable(db.Model):
         if not self.candidate.able_to_relocate:  # if the candidate cannot relocate
             output = self.role.region_id == self.candidate.region_id
             """return True if the role's region is the same as their current region"""
-        else:
+        else: # candidate can relocate
             wanted_regions = json.loads(self.candidate.preferences.first().locations)
             output = self.check_x_in_y_dict(wanted_regions, self.role.region_id)
+            """return True if the role's region is in the candidate's preferred regions"""
         return output
 
-    def __init__(self, role_object: Role = None, candidate_object: Candidate = None) -> None:
+    def organisation_check(self) -> bool:
+        wanted_orgs = json.loads(self.candidate.preferences.first().organisation)
+        return self.check_x_in_y_dict(wanted_orgs, self.role.organisation)
+
+    def __init__(self, role_object: Role = None, candidate_object: Candidate = None,
+                 weights_dict: Dict[str, int]=weights_dict) -> None:
         self.role = role_object
         self.candidate = candidate_object
         self.candidate_id = self.candidate.id
@@ -366,8 +372,11 @@ class MatchTable(db.Model):
         self.location_match = self.suitable_location_check()
         self.skills_match = self.count_overlap_of_dicts(json.loads(self.role.skills),
                                                         json.loads(self.candidate.preferences.first().skills))
+        self.organisation_match = self.organisation_check()
+        self.weights_dict = weights_dict
         self.match_scores = {'location': self.location_match, 'private office': self.po_match,
-                             'skills': self.skills_match}
+                             'skills': self.skills_match, 'organisation': self.organisation_match}
+
         # if not (self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
         #     self.total = 0
         #     self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
@@ -382,8 +391,8 @@ class MatchTable(db.Model):
         #                                                                       self.fast_streamer.preferences.departments)
         #     self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
         #                          'skills': self.skills_match, 'department': self.department_match}
-        #     self.weighted_scores = self.apply_weighting(weighting_dict=MatchTable.weights_dict)
-        #     self.total = self.create_match_score(self.weighted_scores)
+        self.weighted_scores = self.apply_weighting()
+        self.total = self.create_match_score(self.weighted_scores)
 
     def compare_clearance(self) -> bool:
         """
@@ -402,7 +411,9 @@ class MatchTable(db.Model):
             r = post_c <= fs_c
         return r
 
-    def apply_weighting(self, weighting_dict: Dict[str, int]) -> Dict[str, int]:
-        return {k: self.match_scores[k] * weighting_dict[k] for k in self.match_scores}
+    def apply_weighting(self) -> Dict[str, int]:
+        return {k: self.match_scores[k] * self.weights_dict[k] for k in self.match_scores}
 #     skill_score = db.Column(db.Integer)
 #     location_score = db.Column(db.Integer)
+
+
