@@ -34,4 +34,18 @@ def data():
     roles = [role for role in roles if role.id in random_ids]
     candidate_ids = random.sample([c[0] for c in candidate_ids], requested_data)
     candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
+    session['candidates'] = [c.id for c in candidates]
+    session['roles'] = [r.id for r in roles]
     return render_template('matching/data.html', candidates=candidates, data=requested_data, roles=roles)
+
+
+@bp.route('/match')
+def match():
+    try:
+        candidate_ids = session['candidates']
+        role_ids = session['roles']
+    except KeyError:
+        return redirect(url_for('matching.trial'))
+    candidates = Candidate.query.filter(Candidate.id.in_(candidate_ids)).all()
+    roles = Role.query.filter(Role.id.in_(role_ids)).all()
+    return candidates[0].first_name

@@ -225,6 +225,8 @@ class Preferences(db.Model, Base):
         return [skill_id_and_name[skill] for preference, skill in skills_dict.items()]
 
     def wanted_organisations(self):
+        """This function examines the 'wanted organisations' stored as integers in JSON code and returns their names
+        for display"""
         orgs_dict = json.loads(self.organisation)
         organisation_id_and_name = dict(
             Organisation.query.with_entities(Organisation.id, Organisation.name).all()
