@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+    <div class="col-md-8">
+<h1>
+    Matches
+</h1>
+    <h2>
+        Aggregate score: {{ aggregate }}<br>
+        Median score: {{ average }}
+    </h2>
+    <br>
+    {% for match in matches  %}
+        Role id: {{ match.role_id }}<br>
+        Candidate id: {{ match.candidate_id }}<br>
+        Score: {{ match.total }}<br>
+        <hr>
+    {% endfor %}
+
+     </div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from flask import json
 
-from app.models import User, Candidate, Preferences, random_weighted_value
+from app.models import User, Candidate, Preferences, random_weighted_value, Algorithm
 
 
 def test_password_hash():
@@ -52,3 +52,5 @@ def test_create_random_preferences():
     assert count_dictionary[1] <= 25
     assert count_dictionary[2] <= 35
     assert count_dictionary[3] <= 55
+
+

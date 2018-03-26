@@ -4,7 +4,26 @@
 <h1>
     Here are your candidates and roles
 </h1>
-    <h3>Calculating the best match for {{ data }} candidates will require {{ data ** 4 }} steps.</h3>
+    <h3>Calculating the best match for {{ data }} candidates will require {{ data ** 4 }} steps.
+        Below are the weightings I'll use when deciding who should do what.</h3>
+    <p>
+    <ul>
+    <li>
+        Each matched skill is worth 10 points
+    </li>
+    <li>
+        A matched preference for a private office role is worth 10 points
+    </li>
+    <li>
+        A matched preference for location is worth 5 points
+    </li>
+    <li>
+        A matched organisation is worth 5 points
+    </li>
+    </ul>
+    The maximum total score is therefore 50 points
+    </p>
+     <p><a class="btn btn-primary"  href="{{ url_for('matching.match') }}" role="button">Let's go!</a></p>
     <div class="col-md-6">
         <h2>
             Candidates

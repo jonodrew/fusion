@@ -1,7 +1,10 @@
 import datetime
 import random
-from typing import Dict, List, Any, Union, Set
+import statistics
+from typing import Dict, List, Any, Union, Set, Tuple
 
+import munkres
+import sys
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from app import login, db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -262,15 +265,16 @@ class Skill(db.Model):
         return 'Skill {}'.format(self.description)
 
 
-class MatchTable(db.Model):
+class Match(db.Model):
     __tablename__ = 'matches'
     id = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.ForeignKey('candidates.id'))
     role_id = db.Column(db.ForeignKey('roles.id'))
     scores = db.Column(db.JSON())
-    match_score = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+    suggested = db.Column(db.Boolean, default=False)
 
-    weights_dict = {'location': 15, 'skills': 20, 'private office': 10, 'organisation': 15}
+    weights_dict = {'location': 5, 'skills': 10, 'private office': 10, 'organisation': 5}
 
     @staticmethod
     def check_if_equal(p_attribute: str, fs_attribute: str) -> int:
@@ -349,7 +353,7 @@ class MatchTable(db.Model):
         if not self.candidate.able_to_relocate:  # if the candidate cannot relocate
             output = self.role.region_id == self.candidate.region_id
             """return True if the role's region is the same as their current region"""
-        else: # candidate can relocate
+        else:  # candidate can relocate
             wanted_regions = json.loads(self.candidate.preferences.first().locations)
             output = self.check_x_in_y_dict(wanted_regions, self.role.region_id)
             """return True if the role's region is in the candidate's preferred regions"""
@@ -365,34 +369,24 @@ class MatchTable(db.Model):
         self.candidate = candidate_object
         self.candidate_id = self.candidate.id
         self.role_id = self.role.id
-        self.po_match = self.boolean_implication(self.role.private_office,
-                                                 self.candidate.preferences.first().want_private_office)
-        # self.reserved_match = self.boolean_implication(self.post.reserved, self.fast_streamer.national)
-        # self.clearance_match = self.compare_clearance()
-        self.location_match = self.suitable_location_check()
-        self.skills_match = self.count_overlap_of_dicts(json.loads(self.role.skills),
-                                                        json.loads(self.candidate.preferences.first().skills))
-        self.organisation_match = self.organisation_check()
         self.weights_dict = weights_dict
-        self.match_scores = {'location': self.location_match, 'private office': self.po_match,
-                             'skills': self.skills_match, 'organisation': self.organisation_match}
-
-        # if not (self.clearance_match and self.po_match and self.reserved_match and self.suitable_location):
-        #     self.total = 0
-        #     self.weighted_scores = {'anchor': 0, 'location': 0, 'skills': 0, 'department': 0}
-        #     # this approach massively improves speed when generating the matrix, but also means that the match cannot
-        #     # later be examined for how good or bad it was
-        # else:
-        #     self.anchor_match = self.check_x_in_y_dict(self.fast_streamer.preferences.anchors, self.post.anchor)
-        #     self.location_match = self.check_x_in_y_list(self.fast_streamer.preferences.locations, self.post.location)
-        #     self.skills_match = self.check_any_item_from_list_a_in_list_b(self.post.skills,
-        #                                                                   self.fast_streamer.preferences.skills)
-        #     self.department_match = self.check_any_item_from_list_a_in_list_b(self.post.department,
-        #                                                                       self.fast_streamer.preferences.departments)
-        #     self.match_scores = {'anchor': self.anchor_match, 'location': self.location_match,
-        #                          'skills': self.skills_match, 'department': self.department_match}
+        self.boolean_scores = self.create_scores()
         self.weighted_scores = self.apply_weighting()
-        self.total = self.create_match_score(self.weighted_scores)
+        self.scores = json.dumps(self.weighted_scores)
+        self.total = self.calculate_total()
+
+    def create_scores(self):
+        po_match = self.boolean_implication(self.candidate.preferences.first().want_private_office,
+                                            self.role.private_office)
+        location_match = self.suitable_location_check()
+        skills_match = self.count_overlap_of_dicts(json.loads(self.role.skills),
+                                                        json.loads(self.candidate.preferences.first().skills))
+        organisation_match = self.organisation_check()
+        return {'location': location_match, 'private office': po_match,
+                             'skills': skills_match, 'organisation': organisation_match}
+
+    def calculate_total(self):
+        return self.create_match_score(self.weighted_scores)
 
     def compare_clearance(self) -> bool:
         """
@@ -412,8 +406,50 @@ class MatchTable(db.Model):
         return r
 
     def apply_weighting(self) -> Dict[str, int]:
-        return {k: self.match_scores[k] * self.weights_dict[k] for k in self.match_scores}
-#     skill_score = db.Column(db.Integer)
-#     location_score = db.Column(db.Integer)
+        return {k: self.boolean_scores[k] * self.weights_dict[k] for k in self.boolean_scores}
+
+
+class Algorithm:
+    def __init__(self, candidate_ids: List[int], role_ids: List[int], weighted_dict: Dict[str, int]=None):
+        if weighted_dict is None:
+            self.weighted_dict = {'location': 15, 'skills': 20, 'private office': 15, 'organisation': 10}
+        else:
+            self.weighted_dict = weighted_dict
+        self.candidate_ids = candidate_ids
+        self.role_ids = role_ids
+
+    def process(self):
+        candidates = self.filtered_list_of_table_objects(Candidate, self.candidate_ids)
+        roles = self.filtered_list_of_table_objects(Role, self.role_ids)
+        matches = [Match(r, c, self.weighted_dict) for r in roles for c in candidates]
+        tables = self.prepare_data_for_munkres(matches)
+        munkres_object = munkres.Munkres()
+        table_of_objects = tables[0]
+        table_of_totals = tables[1]
+        best_match_indices = munkres_object.compute(table_of_totals)
+        best_matches = [table_of_objects[row][column] for row, column in best_match_indices]
+        aggregate = sum([m.total for m in best_matches])
+        totals = [m.total for m in best_matches]
+        median_average = "{:.1%}".format(statistics.median(totals) / 100)
+        db.session.add_all(matches)
+        db.session.commit()
+
+    @staticmethod
+    def filtered_list_of_table_objects(table_object, filter_list) -> List[Union[Candidate, Role]]:
+        return table_object.query.filter(table_object.id.in_(filter_list)).all()
+
+    def prepare_data_for_munkres(self, match_list: List[Match]):
+        match_list.sort(key=lambda x: x.role_id)
+        table_of_matches = [match_list[i:i + len(self.candidate_ids)] for i in range(0, len(match_list),
+                                                                                     len(self.candidate_ids))]
+        table_of_totals = [[sys.maxsize - m.total for m in row] for row in table_of_matches]
+        return table_of_matches, table_of_totals
+
+    def mark_suggested_matches(self, suggested_match_indices: List[Tuple[int, int]],
+                               list_of_list_of_objects: List[List[Match]]) -> List[List[Match]]:
+        suggested_matches = [list_of_list_of_objects[row][column] for row, column in suggested_match_indices]
+        for match in suggested_matches:
+            match.suggested = True
+        return list_of_list_of_objects
 
 
