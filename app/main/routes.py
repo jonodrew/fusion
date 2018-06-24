@@ -28,9 +28,9 @@ def index():
 def submit_role():
     form = DepartmentalRoleForm()
     if form.validate_on_submit():
-        flash('Role {} submitted'.format(form.title))
+        flash('Role submitted')
         return redirect(url_for('main.index'))
-    return render_template('submit-role.html', title="Submit a role", form=form)
+    return render_template('submit-role.html', title="Submit a Fast Stream role", form=form)
 
 
 @bp.route('/profile')

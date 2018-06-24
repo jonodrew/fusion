@@ -116,5 +116,5 @@ govuk_template/
 
 assets/images/
 
-postgresql/
+postgresql/*
 /test_local.dump

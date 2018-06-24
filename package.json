@@ -1,0 +1,25 @@
+{
+  "name": "fusion",
+  "version": "1.0.0",
+  "description": "[![Build Status](https://travis-ci.com/jonodrew/fusion.svg?token=DT4xpfne9M8XH97Wmrj8&branch=master)](https://travis-ci.com/jonodrew/fusion)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonodrew/fusion.git"
+  },
+  "author": "Jonathan Kerr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonodrew/fusion/issues"
+  },
+  "homepage": "https://github.com/jonodrew/fusion#readme",
+  "dependencies": {
+    "govuk-frontend": "^1.0.0"
+  }
+}
