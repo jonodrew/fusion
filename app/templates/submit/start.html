@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div class="govuk-breadcrumbs">
+    <ol class="govuk-breadcrumbs__list">
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="#">Home</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="#">Fast Stream</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item" aria-current="page">Submit a role</li>
+    </ol>
+  </div>
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-xl">{{ title }}</h1>
+
+        <p class="govuk-body">Use this service to:</p>
+
+        <ul class="govuk-list govuk-list--bullet">
+          <li>submit a role you think would be suitable for a Fast Stream trainee</li>
+          <li>update the details of a role you've already submitted</li>
+          <li>delete a role that no longer exists</li>
+        </ul>
+
+        <p class="govuk-body">Submitting a role will take around 45 minutes.</p>
+
+        <a href="{{ url_for('submit.role_details') }}" role="button" class="govuk-button govuk-button--start govuk-!-margin-top-2 govuk-!-margin-bottom-8">
+  Start now
+</a>
+
+        <h2 class="govuk-heading-m">If you're submitting a role for the first time, check you have all the details you'll need</h2>
+
+          <ul class="govuk-list govuk-list--bullet">
+          <li>details of the role, including title, deliverables, and context</li>
+          <li>contact details for the trainee's manager</li>
+        </ul>
+
+      </div>
+
+      <div class="govuk-grid-column-one-third">
+
+        <!-- The Related items component is not part of GOV.UK Frontend but will be styled if used in the Prototype Kit -->
+
+        <aside class="app-related-items" role="complementary">
+          <h2 class="govuk-heading-m" id="subsection-title">
+            Subsection
+          </h2>
+          <nav role="navigation" aria-labelledby="subsection-title">
+            <ul class="govuk-list govuk-!-font-size-16">
+              <li>
+                <a href="#">
+                  Related link
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  Related link
+                </a>
+              </li>
+              <li>
+                <a href="#" class="govuk-!-font-weight-bold">
+                  More <span class="govuk-visually-hidden">in Subsection</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+  </div>
+{% endblock %}

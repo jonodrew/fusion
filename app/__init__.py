@@ -44,6 +44,10 @@ def create_app(config_class=Config) -> Flask:
     from app.matching import bp as matching_bp
     app.register_blueprint(matching_bp, url_prefix='/matching')
 
+    from app.submit import bp as submit_bp
+    app.register_blueprint(submit_bp, url_prefix='/submit')
+
+
     return app
 
 

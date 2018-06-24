@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">Role details</h1>
+
+        <form action="/form-handler" method="post">
+    <div class="govuk-form-group">
+    {% include '_textarea.html' %}
+        {% include '_radio.html' %}
+    </div>
+        <button type="submit" class="govuk-button">
+  Continue
+</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}
