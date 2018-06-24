@@ -5,13 +5,12 @@
     <title>Submit a Fast Stream role - GOV.UK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="blue" />
-
-          <link rel="shortcut icon" href="/assets/images/favicon.ico" type="image/x-icon" />
-      <link rel="mask-icon" href="/assets/images/govuk-mask-icon.svg" color="blue">
-      <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/govuk-apple-touch-icon-180x180.png">
-      <link rel="apple-touch-icon" sizes="167x167" href="/assets/images/govuk-apple-touch-icon-167x167.png">
-      <link rel="apple-touch-icon" sizes="152x152" href="/assets/images/govuk-apple-touch-icon-152x152.png">
-      <link rel="apple-touch-icon" href="/assets/images/govuk-apple-touch-icon.png">
+      <link rel="shortcut icon" href="{{ url_for('static', filename="images/favicon.ico") }}" type="image/x-icon" />
+      <link rel="mask-icon" href="{{ url_for('static', filename="images/govuk-mask-icon.svg") }}" color="blue">
+      <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename="images/govuk-apple-touch-icon-180x180.png") }}">
+      <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename="images/govuk-apple-touch-icon-167x167.png") }}">
+      <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename="images/govuk-apple-touch-icon-152x152.png") }}">
+      <link rel="apple-touch-icon" href="{{ url_for('static', filename="images/govuk-apple-touch-icon.png") }}">
 
 
   <meta name="robots" content="noindex, nofollow">
@@ -41,9 +40,6 @@
         {% block content %}
         
         {% endblock %}
-
-
-{#  <a href="#" class="govuk-back-link">Go back</a>#}
 
       </div>
 
