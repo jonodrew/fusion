@@ -6,7 +6,6 @@ from flask_login import LoginManager
 from flask_sendgrid import SendGrid
 from redis import Redis
 
-
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()

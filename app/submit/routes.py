@@ -27,7 +27,8 @@ def role_details():
                           'values': {'Baseline Personnel Security Standard': 'BPSS',
                                      'Security Check': 'SC',
                                      'Counter-Terrorism Check': 'CTC',
-                                     'Developed Vetting': 'DV'}
+                                     'Developed Vetting': 'DV',
+                                     'Not applicable': 'NA'}
                           }
                 }
     return render_template('submit/role-details.html', title='Role details', question=question)
