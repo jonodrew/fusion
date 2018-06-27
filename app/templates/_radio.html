@@ -1,0 +1,10 @@
+<fieldset class="govuk-fieldset">
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+        {{ question.radio.heading }}
+    </legend>
+    <div class="govuk-radios">
+        {% for label, value in question.radio['values'].items()  %}
+            {% include '_radio_input.html' %}
+        {% endfor %}
+    </div>
+  </fieldset>

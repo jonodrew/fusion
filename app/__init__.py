@@ -1,21 +1,18 @@
 from flask import Flask
-from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_sendgrid import SendGrid
-from flask_assets import Environment, Bundle
-from os.path import abspath, join
+from redis import Redis
 
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page'
-# bootstrap = Bootstrap()
+redis = Redis(host='redis', port=6379)
 mail = SendGrid()
-# assets = Environment()
 
 
 def create_app(config_class=Config) -> Flask:
@@ -25,11 +22,8 @@ def create_app(config_class=Config) -> Flask:
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    # bootstrap.init_app(app)
     mail.init_app(app)
-    # assets.init_app(app)
-    # with app.app_context():
-    #     assets.directory =  '/node_modules'
+
 
     """these are blueprints - a way of making a Flask application more modular and re-usable"""
     from app.errors import bp as errors_bp
@@ -43,6 +37,10 @@ def create_app(config_class=Config) -> Flask:
 
     from app.matching import bp as matching_bp
     app.register_blueprint(matching_bp, url_prefix='/matching')
+
+    from app.submit import bp as submit_bp
+    app.register_blueprint(submit_bp, url_prefix='/submit')
+
 
     return app
 

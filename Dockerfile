@@ -6,7 +6,6 @@ RUN python -m venv venv
 RUN pip install -r requirements.txt
 COPY app app
 COPY migrations migrations
-COPY assets assets
 COPY config.py fusion.py deploy.sh ./
 RUN chmod +x deploy.sh
 ENV FLASK_APP fusion.py
