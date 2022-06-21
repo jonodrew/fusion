@@ -24,7 +24,7 @@ kombu==4.1.0
 Mako==1.0.7
 MarkupSafe==1.0
 munkres==1.0.12
-numpy==1.14.0
+numpy==1.22.0
 pandas==0.22.0
 pg8000==1.11.0
 pluggy==0.6.0
